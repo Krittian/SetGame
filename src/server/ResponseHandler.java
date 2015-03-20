@@ -49,7 +49,7 @@ public abstract class ResponseHandler implements HttpHandler {
                 if (ind > 0) {
                     data = data.substring(ind);
                 } else {
-                    this.sendJSON(nullJSON.toString(), he);
+                    this.sendJSON(nullJSON, he);
                     return;
                 }
             }
@@ -61,7 +61,7 @@ public abstract class ResponseHandler implements HttpHandler {
             jsonMap = new JSONObject(data);
             this.handleRequest(jsonMap, he);
         } catch (JSONException jse) {
-            this.sendJSON(nullJSON.toString(), he);
+            this.sendJSON(nullJSON, he);
             jse.printStackTrace();
         }
     }
@@ -75,6 +75,9 @@ public abstract class ResponseHandler implements HttpHandler {
         return request;
     }
 
+    public void sendJSON(JSONObject json,HttpExchange he)  {
+        this.sendJSON(json.toString(), he);
+    }
     public void sendJSON(String json, HttpExchange he) {
         try {
             he.getResponseHeaders().set("Date", (new Date()).toString());

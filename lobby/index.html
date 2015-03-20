@@ -5,7 +5,19 @@
         <script src="/javascript/jquery-1.7.1.min.js"></script>
         <script type="text/javascript">
             var userinfo = "";
-            function sendData() {
+            function requestGameListData() {
+                $.ajax({
+                    type: "POST",
+                    url: "/lobbyDATA",
+                    dataType: "json",
+                    contentType: 'application/json; charset=UTF-8',
+                    data: JSON.stringify({gamelist_request: true}),
+                    success: function (data, textStatus, jqXHR) {
+
+                    }
+                });
+            }
+            function sendLoginData() {
                 var userdata = {
                     name: document.getElementById("name").value,
                     password: document.getElementById("password").value
@@ -17,8 +29,13 @@
                     contentType: 'application/json; charset=UTF-8',
                     data: JSON.stringify({login: userdata}),
                     success: function (data, textStatus, jqXHR) {
-                        document.getElementById("submitted").innerHTML = ": " + JSON.stringify(data,null,2) + ": " + textStatus;
-                        userinfo = data;
+                        if (data["authentication"] === true) {
+                            document.getElementById("login").style.visibility = "Hidden";
+                            document.getElementById("submitted").innerHTML = "Welcome back " + userdata["name"]+"!";
+                            userinfo = data["userinfo"];
+                        } else {
+                            document.getElementById("submitted").innerHTML = "invalid username or password. try again."
+                        }
                     }
                 });
             }
@@ -28,9 +45,12 @@
 
 
         <h1>Lobby</h1>
-        Name: <input type="text" id="name"/>
-        Password: <input type="password" id="password" />
-        <input type="button" value="submit" onclick="sendData()" />
+        <div id="login">
+            (Hint try username: "Eli", password: "b")<br/>
+            Name: <input type="text" id="name"/>
+            Password: <input type="password" id="password" />
+            <input type="button" value="submit" onclick="sendLoginData()" />
+        </div>
         <div id="submitted"></div>
         <div id="complete"></div>
         <div id="a2"></div>

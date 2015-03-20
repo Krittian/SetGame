@@ -6,6 +6,7 @@
 package server;
 
 import com.sun.net.httpserver.HttpExchange;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
@@ -20,6 +21,9 @@ public class LobbyHandler extends ResponseHandler {
     public static final String NAME_STRING = "name";
     public static final String PWD_STRING = "password";
     public static final String ADD_PLAYER_STRING = "addplayer";
+    public static final String AUTH_STRING = "authentication";
+    public static final String USER_COOKIE = "user_cookie";
+    public static final String REQ_GAMELIST_STRING = "gamelist_request";
 
     public LobbyHandler(GameHandler g) {
         this.gamehandler = g;
@@ -27,15 +31,24 @@ public class LobbyHandler extends ResponseHandler {
 
     @Override
     public void handleRequest(JSONObject jsonMap, HttpExchange he) {
-        if(jsonMap.has(LOGIN_STRING)) {
+        boolean sent = false;
+        if (jsonMap.has(LOGIN_STRING)) {
 //          format of login_string {login: {name: ______, password: _____}}
 //          therefore we need to unpack to JSONObject
             JSONObject login = jsonMap.getJSONObject(LOGIN_STRING);
             String name = login.getString(NAME_STRING);
             String pwd = login.getString(PWD_STRING);
-            System.out.println(name+": " +pwd);
+            System.out.println("lobbyHandler received: " + name + ", " + pwd);
+            JSONObject ret = new JSONObject();
+            if (name.equals("Eli") && pwd.equals("b")) {
+                ret.put(AUTH_STRING, true);
+            } else {
+                ret.put(AUTH_STRING,false);
+            }
+            this.sendJSON(ret, he);
+            sent = true;
         }
-        this.sendJSON((new JSONObject()).toString(), he);
+        if (!sent) this.sendJSON(new JSONObject(), he);
     }
 
 }

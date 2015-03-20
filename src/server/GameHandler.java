@@ -15,26 +15,33 @@ import org.json.JSONObject;
  */
 public class GameHandler extends ResponseHandler {
 
-    private HashMap<Integer, Game> gameList;
+    private HashMap<String, Game> gameList;
 
     public GameHandler() {
         gameList = new HashMap<>();
     }
 
-    public int addGame() {
-        int game_id = 3;
-        return game_id;
+    public boolean addGame(String name) {
+        if (gameList.containsKey(name)) {
+            return false;
+        }
+        Game game = new Game(name);
+        gameList.put(name, game);
+        return true;
     }
-    public Integer[] getPlayers(int game_id) {
-        return gameList.get(game_id).getPlayers();
+
+    public Integer[] getPlayers(String game_name) {
+        return gameList.get(game_name).getPlayers();
     }
-    public String[] getOutCards(int game_id) {
-        return gameList.get(game_id).getOutCards();
+
+    public String[] getOutCards(String game_name) {
+        return gameList.get(game_name).getOutCards();
     }
+
     @Override
     public void handleRequest(JSONObject jsonMap, HttpExchange he) {
         System.out.println("\nGameHandler received: " + jsonMap.toString());
-        
+
         // send an empty json string {} until we do something else.
         this.sendJSON((new JSONObject()).toString(), he);
     }

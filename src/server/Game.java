@@ -19,6 +19,7 @@ import java.util.Set;
  */
 public class Game {
 
+    private String name;
     private final int INIT_SIZE = 12;
 
     // Each card is a 4 digit String where each digit is from 0 - 2 
@@ -30,13 +31,9 @@ public class Game {
     private HashMap<Integer, ArrayList<String>> players;
     private HashMap<String, Object> outCards;
 
-    public Game(int player_id) {
-        this();
+    public Game(String name) {
+        this.name = name;
         players = new HashMap<>();
-        players.put(player_id, new ArrayList<String>());
-    }
-
-    public Game() {
         deck = new HashMap<>(81);
         outCards = new HashMap<>(21);
 
