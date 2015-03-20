@@ -17,7 +17,7 @@
                     contentType: 'application/json; charset=UTF-8',
                     data: JSON.stringify({login: userdata}),
                     success: function (data, textStatus, jqXHR) {
-                        document.getElementById("submitted").innerHTML = ": " + data["Response"] + ": " + textStatus;
+                        document.getElementById("submitted").innerHTML = ": " + JSON.stringify(data,null,2) + ": " + textStatus;
                         userinfo = data;
                     }
                 });

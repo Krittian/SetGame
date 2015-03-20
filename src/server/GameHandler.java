@@ -6,13 +6,8 @@
 package server;
 
 import com.sun.net.httpserver.HttpExchange;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 /**
  *
@@ -38,9 +33,9 @@ public class GameHandler extends ResponseHandler {
     }
     @Override
     public void handleRequest(JSONObject jsonMap, HttpExchange he) {
-        System.out.println("\nGameHandler received: ");
-        String json = "{\"a\": \"b\"}";
+        System.out.println("\nGameHandler received: " + jsonMap.toString());
         
-        this.sendJSON(json, he);
+        // send an empty json string {} until we do something else.
+        this.sendJSON((new JSONObject()).toString(), he);
     }
 }

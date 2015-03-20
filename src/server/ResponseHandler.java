@@ -16,10 +16,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-import org.json.simple.parser.ContainerFactory;
-import org.json.simple.*;
+import org.json.JSONObject;
+import org.json.JSONTokener;
+import org.json.JSONException;
 
 /**
  *
@@ -29,56 +28,42 @@ public abstract class ResponseHandler implements HttpHandler {
 
     private byte buf[];
     private final int BUF_SIZE = 2048;
-    private JSONParser parser = new JSONParser();
-
-    private ContainerFactory containerFactory = new ContainerFactory() {
-        @Override
-        public List creatArrayContainer() {
-            return new LinkedList();
-        }
-
-        @Override
-        public Map createObjectContainer() {
-            return new LinkedHashMap();
-        }
-    };
+    private final JSONObject nullJSON = new JSONObject();
 
     public ResponseHandler() {
         buf = new byte[BUF_SIZE];
     }
 
     public void handleRequest(JSONObject jsonMap, HttpExchange he) {
+        System.out.println("super");
     }
 
     @Override
     public void handle(HttpExchange he) throws IOException {
-        JSONObject jsonMap = null;
+        JSONObject jsonMap;
+        String data = "{}";
         switch (he.getRequestMethod()) {
             case "GET": {
-                String data = he.getRequestURI().toString();
-                System.out.println(data);
+                data = he.getRequestURI().toString();
                 int ind = data.indexOf('?') + 1;
                 if (ind > 0) {
                     data = data.substring(ind);
                 } else {
+                    this.sendJSON(nullJSON.toString(), he);
                     return;
-                }
-                try {
-                    jsonMap = (JSONObject)parser.parse(data,this.containerFactory);
-                } catch (ParseException pe) {
-                    
                 }
             }
             case "POST": {
-                String data = readRequest(he);
-                try {
-                    jsonMap = (JSONObject)parser.parse(data,this.containerFactory);
-                } catch (ParseException pe) {
-                    
-                }
+                data = readRequest(he);
             }
         }
-        handleRequest(jsonMap, he);
+        try {
+            jsonMap = new JSONObject(data);
+            this.handleRequest(jsonMap, he);
+        } catch (JSONException jse) {
+            this.sendJSON(nullJSON.toString(), he);
+            jse.printStackTrace();
+        }
     }
 
     public String readRequest(HttpExchange he) throws IOException {

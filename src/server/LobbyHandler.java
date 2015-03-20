@@ -6,8 +6,7 @@
 package server;
 
 import com.sun.net.httpserver.HttpExchange;
-import java.util.Map;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 /**
  *
@@ -28,8 +27,15 @@ public class LobbyHandler extends ResponseHandler {
 
     @Override
     public void handleRequest(JSONObject jsonMap, HttpExchange he) {
-        
-        this.sendJSON("{\"Response\": \"recieved\"}", he);
+        if(jsonMap.has(LOGIN_STRING)) {
+//          format of login_string {login: {name: ______, password: _____}}
+//          therefore we need to unpack to JSONObject
+            JSONObject login = jsonMap.getJSONObject(LOGIN_STRING);
+            String name = login.getString(NAME_STRING);
+            String pwd = login.getString(PWD_STRING);
+            System.out.println(name+": " +pwd);
+        }
+        this.sendJSON((new JSONObject()).toString(), he);
     }
 
 }
