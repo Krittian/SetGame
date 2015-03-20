@@ -1,0 +1,7 @@
+To run the server first compile using:
+make compile
+then run using:
+make run
+
+Look at index.html for an example of the data that can be transferred.
+The other files of interest might be src/server/GameHandler.java and src/server/ResponseHandler.java

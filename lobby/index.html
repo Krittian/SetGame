@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Lobby</title>
+        <script src="/javascript/jquery-1.7.1.min.js"></script>
+        <script type="text/javascript">
+            var userinfo = "";
+            function sendData() {
+                var userdata = {
+                    name: document.getElementById("name").value,
+                    password: document.getElementById("password").value
+                };
+                $.ajax({
+                    type: "POST",
+                    url: "/lobbyDATA",
+                    dataType: "json",
+                    contentType: 'application/json; charset=UTF-8',
+                    data: JSON.stringify({login: userdata}),
+                    success: function (data, textStatus, jqXHR) {
+                        document.getElementById("submitted").innerHTML = ": " + data["Response"] + ": " + textStatus;
+                        userinfo = data;
+                    }
+                });
+            }
+        </script>
+    </head>
+    <body>
+
+
+        <h1>Lobby</h1>
+        Name: <input type="text" id="name"/>
+        Password: <input type="password" id="password" />
+        <input type="button" value="submit" onclick="sendData()" />
+        <div id="submitted"></div>
+        <div id="complete"></div>
+        <div id="a2"></div>
+
+    </body>
+</html>

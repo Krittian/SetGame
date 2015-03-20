@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Tester</title>
+        <script src="/javascript/jquery-1.7.1.min.js"></script>
+    </head>
+    <body>
+
+
+        <h1>TestBed</h1>
+
+        <script>
+            var exampleJSONData = {
+                Name: "Eli",
+                Game: "{x: 1, y: 2, z: 3},{a: 3, b: 4, c: 5}"
+            };
+
+            function setterSend() {
+                $.ajax({
+                    type: "GET",
+                    url: "/gameDATA",
+                    dataType: "json",
+                    data: exampleJSONData,
+                    cache: true,
+                    success: function (msg) {
+                        returnedJSONdata = msg;
+                    }
+                });
+            }           
+        </script>
+    </body>
+</html>
