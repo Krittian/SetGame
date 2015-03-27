@@ -20,6 +20,7 @@ import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
 /**
  *
  * @author EliFriedman
@@ -43,9 +44,11 @@ public class WebServer2 {
             props.log(ex.toString());
         }
     }
-    
-    public void start() { server.start(); }
-    
+
+    public void start() {
+        server.start();
+    }
+
     public void addService(String path, HttpHandler service) {
         server.createContext(path, service);
     }
@@ -62,6 +65,7 @@ public class WebServer2 {
 }
 
 class FileHandler implements HttpHandler {
+
     private byte[] buf;
     private final Properties props;
 
@@ -74,8 +78,8 @@ class FileHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange he) throws IOException {
         String root = props.getRoot().getAbsolutePath();
-        if (he.getRequestMethod().equalsIgnoreCase("GET") ||
-                he.getRequestMethod().equalsIgnoreCase("POST")) {
+        if (he.getRequestMethod().equalsIgnoreCase("GET")
+                || he.getRequestMethod().equalsIgnoreCase("POST")) {
             String path = he.getRequestURI().getPath().replaceAll("\\.\\.", "");
             File f = new File(root + path);
 
@@ -117,14 +121,62 @@ class FileHandler implements HttpHandler {
         header.set("Date", (new Date()).toString());
         if (ret) {
             if (!targ.isDirectory()) {
-
                 header.set("Content-length", Long.toString(targ.length()));
                 header.set("Last-Modified", (new Date(targ.lastModified())).toString());
                 String name = targ.getName();
                 int ind = name.lastIndexOf('.');
+
                 String ct = null;
-                if (ind > 0) {
-                    ct = HttpURLConnection.getFileNameMap().getContentTypeFor(name);
+                if (ind > 0 && name.length() >= ind+1) {
+                    String ext = name.substring(ind+1);
+                    switch(ext) {
+                        case "pdf":
+                            ct = "application/pdf";
+                            break;
+                        case "bmp":
+                            ct = "image/bmp";
+                            break;
+                        case "css":
+                            ct = "text/css";
+                            break;
+                        case "csv":
+                            ct = "text/csv";
+                            break;
+                        case "html":
+                            ct = "text/html";
+                            break;
+                        case "js":
+                            ct = "application/javascript";
+                            break;
+                        case "json":
+                            ct = "application/json";
+                            break;
+                        case "jpg":
+                        case "jpeg":
+                            ct = "image/jpeg";
+                            break;
+                        case "doc":
+                            ct = "application/msword";
+                            break;
+                        case "mpeg":
+                            ct = "video/mpeg";
+                            break;
+                        case "mp4":
+                            ct = "application/mp4";
+                            break;
+                        case "png":
+                            ct = "image/png";
+                            break;
+                        case "xhtml":
+                            ct = "application/xhtml+xml";
+                            break;
+                        case "xml": 
+                            ct = "application/xml";
+                            break;
+                        case "zip":
+                            ct = "application/zip";
+                            break;
+                    }
                 }
                 if (ct == null) {
                     ct = "unknown/unknown";
