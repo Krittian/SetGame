@@ -35,7 +35,8 @@ public class GameHandler extends ResponseHandler {
     }
 
     public String[] getOutCards(String game_name) {
-        return gameList.get(game_name).getOutCards();
+        boolean shuffle = true;
+        return gameList.get(game_name).getOutCards(shuffle);
     }
 
     @Override

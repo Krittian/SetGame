@@ -49,11 +49,10 @@ public class Game {
      * one set on the board
      */
     private void initializeOutCards() {
-        for (int i = 0; i < INIT_SIZE / 3.0; i++) {
-            add3Cards();
+        for (int i = 0; i < (INIT_SIZE / 3.0 - 1); i++) {
+            add3Cards(false);
         }
-        if (!outContainsSet()) {
-        }
+        add3Cards(true); // ensure outCards contains a set
     }
 
     private boolean outContainsSet() {
@@ -64,7 +63,6 @@ public class Game {
                 if (i != j) {
                     String setCard = getSetCard(cards[i], cards[j]);
                     if (outCards.containsKey(setCard)) {
-//                        System.out.println("Set: " + cards[i] + " " + cards[j] + " " + setCard);
                         return true;
                     }
                 }
@@ -89,11 +87,11 @@ public class Game {
                 ownedcards.add(card2);
                 ownedcards.add(card3);
                 players.put(playerID, ownedcards);
-                
+
                 outCards.remove(card1);
                 outCards.remove(card2);
                 outCards.remove(card3);
-                add3Cards();
+                add3Cards(true); // true == ensure outCards contains a set
                 return ownedcards.size() + 1;
             }
             return ownedcards.size();
@@ -101,11 +99,22 @@ public class Game {
         return -9999;
     }
 
-     public String[] getOutCards() {
-         String[] cards = new String[outCards.keySet().size()];
-         outCards.keySet().toArray(cards);
-         return cards;
-     }
+    public String[] getOutCards(boolean shuffle) {
+        String[] cards = new String[outCards.keySet().size()];
+        outCards.keySet().toArray(cards);
+        if (shuffle) {
+            int index;
+            String temp;
+            Random random = new Random();
+            for (int i = cards.length - 1; i >= 0; i--) {
+                index = random.nextInt(i + 1);
+                temp = cards[index];
+                cards[index] = cards[i];
+                cards[i] = temp;
+            }
+        }
+        return cards;
+    }
 
     /**
      *
@@ -122,20 +131,64 @@ public class Game {
                 && card3.equals(getSetCard(card1, card2));
     }
 
-    private void add3Cards() {
+    private void add3Cards(boolean ensureSet) {
         if (outCards.size() >= INIT_SIZE) {
             return;
         }
         Random rnd = new Random();
-
-        for (int i = 0; i < 3; i++) {
-            int index = rnd.nextInt(deck.size());
-            while (!deck.containsKey(index % 81)) {
-                index++;
+        if (!ensureSet || outContainsSet()) {
+            for (int i = 0; i < 3; i++) {
+                int index = rnd.nextInt(deck.size());
+                while (!deck.containsKey(index % 81)) {
+                    index++;
+                }
+                String card = deck.remove(index);
+                outCards.put(card, 0);
             }
-            String card = deck.remove(index);
-            outCards.put(card, 0);
+        } else {
+            int index1 = rnd.nextInt(deck.size());
+            while (!deck.containsKey(index1)) {
+                index1 = (index1 + 1) % 81;
+            }
+            int index2 = rnd.nextInt(deck.size());
+            int index3 = getSetCard(index1, index2);
+            while (index1 == index2
+                    || !deck.containsKey(index2)
+                    || !deck.containsKey(index2)) {
+                index2 = (index2 + 1) % 81;
+                index3 = getSetCard(index1, index2);
+            }
+
+            String card1 = deck.remove(index1);
+            String card2 = deck.remove(index2);
+            String card3 = deck.remove(index3);
+            outCards.put(card1, 0);
+            outCards.put(card2, 0);
+            outCards.put(card3, 0);
         }
+    }
+
+    /**
+     * Given any two cards returns the unique third card that forms a set with
+     * the first two.
+     *
+     * @param card1
+     * @param card2
+     * @return
+     */
+    private int getSetCard(int c1, int c2) {
+        String card1 = getCardString(c1);
+        String card2 = getCardString(c2);
+        String card3 = "";
+        for (int i = 0; i < 4; i++) {
+            if (card1.charAt(i) == card2.charAt(i)) {
+                card3 += card1.charAt(i);
+            } else {
+                // gets the third value and converts to char
+                card3 += (char) '0' + '3' - (card1.charAt(i) + card2.charAt(i));
+            }
+        }
+        return getCardIndex(card3);
     }
 
     /**
