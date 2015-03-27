@@ -18,6 +18,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -68,11 +69,34 @@ class FileHandler implements HttpHandler {
 
     private byte[] buf;
     private final Properties props;
+    private HashMap<String, String> mimeMap;
 
     FileHandler(Properties props) {
         this.props = props;
         props.printProps();
         this.buf = new byte[256];
+        mimeMap = new HashMap<>();
+        loadMimeMap();
+    }
+
+    private void loadMimeMap() {
+        mimeMap.put("pdf", "application/pdf");
+        mimeMap.put("bmp", "image/bmp");
+        mimeMap.put("css", "text/css");
+        mimeMap.put("csv", "text/csv");
+        mimeMap.put("html", "text/html");
+        mimeMap.put("js", "application/javascript");
+        mimeMap.put("json", "application/json");
+        mimeMap.put("jpg", "image/jpeg");
+        mimeMap.put("jpeg", "image/jpeg");
+        mimeMap.put("doc", "application/msword");
+        mimeMap.put("jsp", "image/jpeg");
+        mimeMap.put("mpeg", "video/mpeg");
+        mimeMap.put("mp4", "application/mp4");
+        mimeMap.put("png", "image/png");
+        mimeMap.put("xhtml", "applicaiton/xhtml+xml");
+        mimeMap.put("xml", "applicaiton/xml");
+        mimeMap.put("zip", "applicaiton/zip");
     }
 
     @Override
@@ -127,56 +151,9 @@ class FileHandler implements HttpHandler {
                 int ind = name.lastIndexOf('.');
 
                 String ct = null;
-                if (ind > 0 && name.length() >= ind+1) {
-                    String ext = name.substring(ind+1);
-                    switch(ext) {
-                        case "pdf":
-                            ct = "application/pdf";
-                            break;
-                        case "bmp":
-                            ct = "image/bmp";
-                            break;
-                        case "css":
-                            ct = "text/css";
-                            break;
-                        case "csv":
-                            ct = "text/csv";
-                            break;
-                        case "html":
-                            ct = "text/html";
-                            break;
-                        case "js":
-                            ct = "application/javascript";
-                            break;
-                        case "json":
-                            ct = "application/json";
-                            break;
-                        case "jpg":
-                        case "jpeg":
-                            ct = "image/jpeg";
-                            break;
-                        case "doc":
-                            ct = "application/msword";
-                            break;
-                        case "mpeg":
-                            ct = "video/mpeg";
-                            break;
-                        case "mp4":
-                            ct = "application/mp4";
-                            break;
-                        case "png":
-                            ct = "image/png";
-                            break;
-                        case "xhtml":
-                            ct = "application/xhtml+xml";
-                            break;
-                        case "xml": 
-                            ct = "application/xml";
-                            break;
-                        case "zip":
-                            ct = "application/zip";
-                            break;
-                    }
+                if (ind > 0 && name.length() >= ind + 1) {
+                    String ext = name.substring(ind + 1);
+                    ct = mimeMap.get(ext);
                 }
                 if (ct == null) {
                     ct = "unknown/unknown";
