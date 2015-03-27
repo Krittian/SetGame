@@ -8,6 +8,7 @@ package server;
 import com.sun.net.httpserver.HttpExchange;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import java.sql.*;
 
 /**
  *
@@ -32,6 +33,7 @@ public class LobbyHandler extends ResponseHandler {
     @Override
     public void handleRequest(JSONObject jsonMap, HttpExchange he) {
         boolean sent = false;
+        getConnection();
         if (jsonMap.has(LOGIN_STRING)) {
 //          format of login_string {login: {name: ______, password: _____}}
 //          therefore we need to unpack to JSONObject
@@ -50,5 +52,24 @@ public class LobbyHandler extends ResponseHandler {
         }
         if (!sent) this.sendJSON(new JSONObject(), he);
     }
+	
+	private Connection getConnection(){
+		
+		Connection con = null;
+		try{
+			//Class.forName("com.mysql.jdbc.Driver").newInstance();
+			Class.forName("com.mysql.jdbc.Driver");
+			System.out.println("got here.");
+			con = DriverManager.getConnection("jdbc:mysql://localhost", "root", "sefariamobile");
+			if(!con.isClosed()){
+					System.out.println("Connected to mySQL!!!");
+			}
+		}catch(Exception e){
+			System.out.println("could not connect to mySQL");
+			System.err.println(e);
 
+		}
+		return con;
+	}
+	
 }
