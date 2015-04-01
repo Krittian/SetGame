@@ -30,23 +30,16 @@ public class LobbyHandler extends ResponseHandler {
     public static final String USER_COOKIE = "user_cookie";
     public static final String REQ_GAMELIST_STRING = "gamelist_request";
 
-    private ArrayList<String> gameIdList;
-    private ArrayList<String> gameNameList;
-    private ArrayList<String> userIdList;
-    private ArrayList<String> userNameList;
-
     public LobbyHandler(GameHandler g) {
         this.gamehandler = g;
-	this.gameIdList = new ArrayList<String>();
-	this.gameNameList = new ArrayList<String>();
-	this.userIdList = new ArrayList<String>();
-	this.userNameList = new ArrayList<String>();
     }
 
     @Override
     public void handleRequest(JSONObject jsonMap, HttpExchange he) {
         boolean sent = false;
         getConnection();
+        JSONObject ret = new JSONObject();
+
         if (jsonMap.has(LOGIN_STRING)) {
 //          format of login_string {login: {name: ______, password: _____}}
 //          therefore we need to unpack to JSONObject
@@ -54,66 +47,60 @@ public class LobbyHandler extends ResponseHandler {
             String name = login.getString(NAME_STRING);
             String pwd = login.getString(PWD_STRING);
             System.out.println("lobbyHandler received: " + name + ", " + pwd);
-            JSONObject ret = new JSONObject();
             if (name.equals("Eli") && pwd.equals("b")) {
                 ret.put(AUTH_STRING, true);
-		Object[] gameIdArray = gameIdList.toArray();
-		Object[] gameNameArray = gameNameList.toArray();
-		System.out.println("SIze: " + gameIdArray.length);
-		for (int i = 0; i < gameIdArray.length; i++) {
-		   gameIdArray[i] = (String) gameIdArray[i]; 
-		   gameNameArray[i] = (String) gameNameArray[i];
-		}
-		ret.put("gameIds",gameIdArray);
-		ret.put("gameNames",gameNameArray);
-		String uuid = UUID.randomUUID().toString();
-		userIdList.add(uuid);
-		userNameList.add(name);
-		ret.put("uid",uuid);
+                Object[] gameIdArray = new Object[gamehandler.getGameList().size()];
+                Object[] gameNameArray = new Object[gamehandler.getGameList().size()];
+                int i = 0;
+                for (Game g : gamehandler.getGameList().values()) {
+                    gameIdArray[i] = (String) g.getID();
+                    gameNameArray[i] = g.getName();
+                    i++;
+                }
+                ret.put("gameIds", gameIdArray);
+                ret.put("gameNames", gameNameArray);
+                String uuid = UUID.randomUUID().toString();
+                ret.put("uid", uuid);
             } else {
-                ret.put(AUTH_STRING,false);
+                ret.put(AUTH_STRING, false);
             }
-            this.sendJSON(ret, he);
-            sent = true;
         } else if (jsonMap.has(GAME_DATA)) {
-	   JSONObject gameData = jsonMap.getJSONObject(GAME_DATA); 
-	   String uid = gameData.getString("uid");
-	   String gameName = gameData.getString("gameName");
-	   String requestType = gameData.getString("request");
+            JSONObject gameData = jsonMap.getJSONObject(GAME_DATA);
+            String uid = gameData.getString("uid");
+            String gameName = gameData.getString("gameName");
+            String requestType = gameData.getString("request");
 
-	   JSONObject ret = new JSONObject();
-	   if (requestType.equals(NEW_GAME_STRING)) {
-		String gameId = UUID.randomUUID().toString();
-		gameIdList.add(gameId);
-		gameNameList.add(gameName);
-		ret.put("gameId",gameId);	
-	   } else if (requestType.equals(JOIN_GAME_STRING)) {
-		ret.put("gameState","you've joined a game!!");
-	   }
-	   System.out.println("lobbyHandler received: " + uid + ", " + gameName + ", " + requestType);
-	   this.sendJSON(ret, he);
-	   sent = true;
-	}
-        if (!sent) this.sendJSON(new JSONObject(), he);
+            if (requestType.equals(NEW_GAME_STRING)) {
+                String gameId = UUID.randomUUID().toString();
+                gamehandler.addGame(gameId, gameName);
+                ret.put("gameId", gameId);
+
+            } else if (requestType.equals(JOIN_GAME_STRING)) {
+                ret.put("gameState", "you've joined a game!!");
+            }
+            System.out.println("lobbyHandler received: " + uid + ", " + gameName + ", " + requestType);
+
+        }
+        this.sendJSON(ret, he);
     }
-	
-	private Connection getConnection(){
-		
-		Connection con = null;
-		try{
-			//Class.forName("com.mysql.jdbc.Driver").newInstance();
-			Class.forName("com.mysql.jdbc.Driver");
-			System.out.println("got here.");
-			con = DriverManager.getConnection("jdbc:mysql://localhost", "root", "sefariamobile");
-			if(!con.isClosed()){
-					System.out.println("Connected to mySQL!!!");
-			}
-		}catch(Exception e){
-			System.out.println("could not connect to mySQL");
-			System.err.println(e);
 
-		}
-		return con;
-	}
-	
+    private Connection getConnection() {
+
+        Connection con = null;
+        try {
+            //Class.forName("com.mysql.jdbc.Driver").newInstance();
+            Class.forName("com.mysql.jdbc.Driver");
+            System.out.println("got here.");
+            con = DriverManager.getConnection("jdbc:mysql://localhost", "root", "sefariamobile");
+            if (!con.isClosed()) {
+                System.out.println("Connected to mySQL!!!");
+            }
+        } catch (Exception e) {
+            System.out.println("could not connect to mySQL");
+            System.err.println(e);
+
+        }
+        return con;
+    }
+
 }

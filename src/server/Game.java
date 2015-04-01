@@ -20,19 +20,22 @@ import java.util.Set;
 public class Game {
 
     private String name;
+    private String ID;
     private final int INIT_SIZE = 12;
-
+    private int statenum;
     // Each card is a 4 digit String where each digit is from 0 - 2 
     // and corresponds to a feature of the Set card
     // "Shape Color Number Fill"
     private HashMap<Integer, String> deck;
 
     // Each player is represented by the cards they won.
-    private HashMap<Integer, ArrayList<String>> players;
+    private HashMap<String, ArrayList<String>> players;
     private HashMap<String, Object> outCards;
 
-    public Game(String name) {
+    public Game(String ID, String name) {
+        this.ID = ID;
         this.name = name;
+        statenum = 0;
         players = new HashMap<>();
         deck = new HashMap<>(81);
         outCards = new HashMap<>(21);
@@ -43,7 +46,12 @@ public class Game {
         }
         initializeOutCards();
     }
-
+    public int getStateNum() {
+        return statenum;
+    }
+    public void incrementStateNum() {
+        statenum++;
+    }
     /**
      * Initializes the cards that are out, making sure that there is at least
      * one set on the board
@@ -79,7 +87,7 @@ public class Game {
      * @param card3
      * @return
      */
-    public int checkSet(int playerID, String card1, String card2, String card3) {
+    public boolean checkSet(String playerID, String card1, String card2, String card3) {
         if (players.containsKey(playerID)) {
             ArrayList<String> ownedcards = players.get(playerID);
             if (checkValidSet(card1, card2, card3)) {
@@ -92,16 +100,16 @@ public class Game {
                 outCards.remove(card2);
                 outCards.remove(card3);
                 add3Cards(true); // true == ensure outCards contains a set
-                return ownedcards.size() + 1;
+                return true;
             }
-            return ownedcards.size();
         }
-        return -9999;
+        return false;
     }
 
     public String[] getOutCards(boolean shuffle) {
         String[] cards = new String[outCards.keySet().size()];
         outCards.keySet().toArray(cards);
+        
         if (shuffle) {
             int index;
             String temp;
@@ -234,9 +242,21 @@ public class Game {
         return Integer.valueOf(card, 3);
     }
 
-    public Integer[] getPlayers() {
-        Integer[] p = new Integer[players.keySet().size()];
+    public String[] getPlayers() {
+        String[] p = new String[players.keySet().size()];
         players.keySet().toArray(p);
         return p;
+    }
+    
+    public String getID() {
+        return ID;
+    }
+    public String getName() {
+        return name;
+    }
+    
+    @Override
+    public String toString() {
+        return name;
     }
 }
