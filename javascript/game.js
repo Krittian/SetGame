@@ -28,13 +28,7 @@ function init() {
     cardConverterArray = createCardArray();
     
     //initBoard
-    boardGrid = new Array(boardWidth);
-    for (i = 0; i < boardWidth; i++) {
-        boardGrid[i] = new Array(boardHeight);
-        for (j = 0; j < boardHeight; j++) {
-            boardGrid[i][j] = -1;
-        }
-    }
+    deleteBoard();
     
     addCard(72,6,2);
     addCard(43,0,0);
@@ -87,7 +81,7 @@ function init() {
 		contentType: 'application/json; charset=UTF-8',
 		data: JSON.stringify(requestObj),
 		    success: function (data, textStatus, jqXHR) {
-			//console.log(new Date($.now()));
+			handleUpdate(data);
 			stateNum ++; //should actually read stateNum value from data
 		     }
         });
@@ -168,6 +162,30 @@ function addCard(cardCode,x,y) {
 function removeCard(x,y) {
     $("td[data-x=" + x + "][data-y=" + y + "]").empty();
     boardGrid[x][y] = -1;
+}
+
+function deleteBoard() {
+    boardGrid = new Array(boardWidth);
+    for (i = 0; i < boardWidth; i++) {
+        boardGrid[i] = new Array(boardHeight);
+        for (j = 0; j < boardHeight; j++) {
+            boardGrid[i][j] = -1;
+        }
+    }
+}
+
+function handleUpdate(data) {
+	if (data["hasUpdate"]) {
+		deleteBoard();
+		stateNum = data["stateNum"];
+		cards = data["cards"];
+		for (i = 0; i < cards.length; i++) {
+			tempCardCode = parseInt(cards[i],3); //trinary
+			x = i%boardWidth;
+			y = Math.floor(i/boardWidth);			
+			addCard(tempCardCode,x,y);
+		}
+	}
 }
 
 //when you have selected 3 cards and an update has been requested, deselect cards
