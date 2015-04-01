@@ -1,0 +1,11 @@
+<html>
+    <header>
+	<script src="/javascript/jquery-1.7.1.min.js" type="text/javascript"></script>
+        <script src="/javascript/game.js"></script>
+	<link rel="stylesheet" type="text/css" href="/css/game.css">
+    </header>
+    <body>
+	<table id="userboard"><tr><td>hello</td></tr></table>
+        <table id="setboard"></table>
+    </body>
+</html>
