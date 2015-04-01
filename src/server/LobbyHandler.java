@@ -9,6 +9,7 @@ import com.sun.net.httpserver.HttpExchange;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.sql.*;
+import java.util.UUID;
 
 /**
  *
@@ -25,6 +26,8 @@ public class LobbyHandler extends ResponseHandler {
     public static final String AUTH_STRING = "authentication";
     public static final String USER_COOKIE = "user_cookie";
     public static final String REQ_GAMELIST_STRING = "gamelist_request";
+    private static final String GAME_DATA = "!!!!!!!";
+    private static final String JOIN_GAME_STRING = "!!!!!";
 
     public LobbyHandler(GameHandler g) {
         this.gamehandler = g;
@@ -33,6 +36,8 @@ public class LobbyHandler extends ResponseHandler {
     @Override
     public void handleRequest(JSONObject jsonMap, HttpExchange he) {
         boolean sent = false;
+        getConnection();
+        JSONObject ret = new JSONObject();
         createTables();
         if (jsonMap.has(LOGIN_STRING)) {
 //          format of login_string {login: {name: ______, password: _____}}
@@ -41,18 +46,43 @@ public class LobbyHandler extends ResponseHandler {
             String name = login.getString(NAME_STRING);
             String pwd = login.getString(PWD_STRING);
             System.out.println("lobbyHandler received: " + name + ", " + pwd);
-            JSONObject ret = new JSONObject();
             if (name.equals("Eli") && pwd.equals("b")) {
                 ret.put(AUTH_STRING, true);
+                Object[] gameIdArray = new Object[gamehandler.getGameList().size()];
+                Object[] gameNameArray = new Object[gamehandler.getGameList().size()];
+                int i = 0;
+                for (Game g : gamehandler.getGameList().values()) {
+                    gameIdArray[i] = (String) g.getID();
+                    gameNameArray[i] = g.getName();
+                    i++;
+                }
+                ret.put("gameIds", gameIdArray);
+                ret.put("gameNames", gameNameArray);
+                String uuid = UUID.randomUUID().toString();
+                ret.put("uid", uuid);
             } else {
-                ret.put(AUTH_STRING,false);
+                ret.put(AUTH_STRING, false);
             }
-            this.sendJSON(ret, he);
-            sent = true;
+        } else if (jsonMap.has(GAME_DATA)) {
+            JSONObject gameData = jsonMap.getJSONObject(GAME_DATA);
+            String uid = gameData.getString("uid");
+            String gameName = gameData.getString("gameName");
+            String requestType = gameData.getString("request");
+
+            if (requestType.equals(NEW_GAME_STRING)) {
+                String gameId = UUID.randomUUID().toString();
+                gamehandler.addGame(gameId, gameName);
+                ret.put("gameId", gameId);
+
+            } else if (requestType.equals(JOIN_GAME_STRING)) {
+                ret.put("gameState", "you've joined a game!!");
+            }
+            System.out.println("lobbyHandler received: " + uid + ", " + gameName + ", " + requestType);
+
         }
-        if (!sent) this.sendJSON(new JSONObject(), he);
+        this.sendJSON(ret, he);
     }
-	
+
 	private Connection getConnection(){
 		
 		Connection con = null;
@@ -99,5 +129,4 @@ public class LobbyHandler extends ResponseHandler {
 			System.err.print(e);
 		}
 	}
-	
 }
