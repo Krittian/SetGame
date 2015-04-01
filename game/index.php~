@@ -1,0 +1,10 @@
+<html>
+    <header>
+        <script src="/javascript/game.js"></script>
+		<link rel="stylesheet" type="text/css" href="../css/game.css">
+    </header>
+    <body>
+        <table id="setboard">
+		</table>
+    </body>
+</html>

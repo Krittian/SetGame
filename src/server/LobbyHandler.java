@@ -9,7 +9,6 @@ import com.sun.net.httpserver.HttpExchange;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.sql.*;
-import java.util.ArrayList;
 import java.util.UUID;
 
 /**
@@ -20,8 +19,6 @@ public class LobbyHandler extends ResponseHandler {
 
     private GameHandler gamehandler;
     public static final String NEW_GAME_STRING = "new_game";
-    public static final String JOIN_GAME_STRING = "join_game";
-    public static final String GAME_DATA = "gameData";
     public static final String LOGIN_STRING = "login";
     public static final String NAME_STRING = "name";
     public static final String PWD_STRING = "password";
@@ -29,6 +26,8 @@ public class LobbyHandler extends ResponseHandler {
     public static final String AUTH_STRING = "authentication";
     public static final String USER_COOKIE = "user_cookie";
     public static final String REQ_GAMELIST_STRING = "gamelist_request";
+    private static final String GAME_DATA = "!!!!!!!";
+    private static final String JOIN_GAME_STRING = "!!!!!";
 
     public LobbyHandler(GameHandler g) {
         this.gamehandler = g;
@@ -39,7 +38,7 @@ public class LobbyHandler extends ResponseHandler {
         boolean sent = false;
         getConnection();
         JSONObject ret = new JSONObject();
-
+        createTables();
         if (jsonMap.has(LOGIN_STRING)) {
 //          format of login_string {login: {name: ______, password: _____}}
 //          therefore we need to unpack to JSONObject
@@ -84,23 +83,50 @@ public class LobbyHandler extends ResponseHandler {
         this.sendJSON(ret, he);
     }
 
-    private Connection getConnection() {
+	private Connection getConnection(){
+		
+		Connection con = null;
+		try{
+			//Class.forName("com.mysql.jdbc.Driver").newInstance();
+			Class.forName("com.mysql.jdbc.Driver");
+			System.out.println("got here.");
+			con = DriverManager.getConnection("jdbc:mysql://localhost/setgame", "root", "betamobile");
+			if(con.isClosed()){
+				System.out.println("mySQL is closed");
+			}
+		}catch(Exception e){
+			System.out.println("could not connect to mySQL");
+			System.err.println(e);
 
-        Connection con = null;
-        try {
-            //Class.forName("com.mysql.jdbc.Driver").newInstance();
-            Class.forName("com.mysql.jdbc.Driver");
-            System.out.println("got here.");
-            con = DriverManager.getConnection("jdbc:mysql://localhost", "root", "sefariamobile");
-            if (!con.isClosed()) {
-                System.out.println("Connected to mySQL!!!");
-            }
-        } catch (Exception e) {
-            System.out.println("could not connect to mySQL");
-            System.err.println(e);
-
-        }
-        return con;
-    }
-
+		}
+		return con;
+	}
+	 
+	private void createTables(){
+		Connection c = getConnection();
+		Statement stmt =null;
+		ResultSet rs = null;
+		String sql = null;
+		
+		try{
+		stmt = c.createStatement();
+		sql = "DROP TABLE IF EXISTS Users; "//	 +			" DROP TABLE Games IF EXISTS;"
+			//+ "DROP TABLE IF EXISTS Games; "
+				;
+		stmt.execute(sql);
+		sql = "CREATE TABLE Users (" +
+				"uid int NOT NULL AUTO_INCREMENT," +
+				"name TEXT," +
+				"password TEXT," +
+				"ssn CHAR(10)," +//don't need it, but if they give us it, why wouldn't we store it.
+				"PRIMARY KEY(uid)" +
+				");";
+	    
+	    stmt.execute(sql);
+	    sql = "";
+	    stmt.close();
+		}catch(Exception e){
+			System.err.print(e);
+		}
+	}
 }
