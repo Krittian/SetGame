@@ -18,6 +18,7 @@ public class GameHandler extends ResponseHandler {
 
     private HashMap<String, Game> gameList;
 
+    
     public GameHandler() {
         gameList = new HashMap<>();
     }

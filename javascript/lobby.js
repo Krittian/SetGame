@@ -52,7 +52,7 @@ function requestGameListData() {
 		 $("#signupSubmitted").text(userdata["name"] +", you signed up successfully!");
 		 sendLoginData(userdata["name"],userdata["password"]);
 	     } else {
-		 $("#signupSubmitted").text("There was a problem...");
+		 $("#signupSubmitted").text("There was a problem...  Make sure your name/password combo is correct.");
 	     }
 	}
     });
@@ -79,8 +79,9 @@ function sendLoginData(name, password) {
 		 userinfo = data["userinfo"];
 		 currGameIds = data["gameIds"];
 		 currGameNames = data["gameNames"];
+		 currGamePlayerCounts  = data["currGamePlayerCounts"];
 		 uid = data["uid"];
-		 refreshGameTable(currGameIds,currGameNames);
+		 refreshGameTable(currGameIds,currGameNames, currGamePlayerCounts);
 	     } else {
 		 $("#submitted").text("invalid username or password. try again.");
 	     }
@@ -113,16 +114,16 @@ function addGame() {
     });
 }
 
-function addToGameTable(id,name) {
-    $("#gamesTable").prepend("<tr data-id=" + id + "><td><a href=\'/game/?gid="+id+"&uid="+uid+"\'>" + name + "</a></td></tr>");
+function addToGameTable(id,name,count) {
+    $("#gamesTable").prepend("<tr data-id=" + id + "><td><a href=\'/game/?gid="+id+"&uid="+uid+"\'>" + name + "</a> Number of Players: " + count + "</td></tr>");
 }
 
 //idList - uuids of currently active games
 //nameList - names corresponding to uuids
-function refreshGameTable(idList, nameList) {
+function refreshGameTable(idList, nameList,countList) {
    $("#gamesTable").empty(); 
    for (i = 0; i < idList.length; i++) {
-	addToGameTable(idList[i],nameList[i]);
+	addToGameTable(idList[i],nameList[i],countList[i]);
    }
    if (idList.length == 0) { //there are no games right now..
 	
