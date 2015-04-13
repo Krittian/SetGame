@@ -56,11 +56,11 @@ public class GameHandler extends ResponseHandler {
         if (jsonMap.has("hasUpdate") 
                 && jsonMap.has("stateNum") 
                 && jsonMap.has("gameId")) {
-            String gId = jsonMap.getString("gameId");
+            String gID = jsonMap.getString("gameId");
             int state = jsonMap.getInt("stateNum");
-            Game g = gameList.get("gId");
+            Game g = gameList.get(gID);
             if(state < g.getStateNum()) {
-                ret = sendGame(gId);
+                ret = sendGame(gID);
                 ret.put("hasUpdate", true);
             } else if(jsonMap.getBoolean("hasUpdate")) {
                 JSONArray set = jsonMap.getJSONArray("set");
