@@ -3,9 +3,22 @@ var currGameIds = []; //updated on requests to server
 var currGameNames = [];
 var uid = ""; //crazy long UUID string
 
+$(function() {
+    init();
+});
 
 function init() {
     console.log("init");
+	$("#loginSubmit").click(function(event) {
+		event.preventDefault();
+		name = document.getElementById("name").value;
+		password = document.getElementById("password").value;
+		sendLoginData(name,password);
+    });
+	$("#signupSubmit").click(function(event) {
+		event.preventDefault();
+		sendSignupData();
+    });
     $("#games").hide();
 }
 function requestGameListData() {
@@ -20,11 +33,36 @@ function requestGameListData() {
 	     }
      });
  }
-function sendLoginData() {
+ 
+ function sendSignupData() {
+    console.log("signing UP");
+     var userdata = {
+	 name: document.getElementById("signupname").value,
+	 password: document.getElementById("signuppassword").value
+     };
+     $.ajax({
+	 type: "POST",
+	 url: "/lobbyDATA",
+	 dataType: "json",
+	 contentType: 'application/json; charset=UTF-8',
+	 data: JSON.stringify({user_signup_request: userdata}),
+	 success: function (data, textStatus, jqXHR) {
+	     if (data["authentication"] === true) {
+		 $("#signup").hide();
+		 $("#signupSubmitted").text(userdata["name"] +", you signed up successfully!");
+		 sendLoginData(userdata["name"],userdata["password"]);
+	     } else {
+		 $("#signupSubmitted").text("There was a problem...");
+	     }
+	}
+    });
+}
+ 
+function sendLoginData(name, password) {
     console.log("yoooo");
      var userdata = {
-	 name: document.getElementById("name").value,
-	 password: document.getElementById("password").value
+	 name: name,
+	 password: password
      };
      $.ajax({
 	 type: "POST",
@@ -35,6 +73,7 @@ function sendLoginData() {
 	 success: function (data, textStatus, jqXHR) {
 	     if (data["authentication"] === true) {
 		 $("#login").hide();
+		 $("#signup").hide();
 		 $("#games").show();
 		 $("#submitted").text("Welcome back " + userdata["name"]+"!");
 		 userinfo = data["userinfo"];
@@ -92,10 +131,3 @@ function refreshGameTable(idList, nameList) {
 }
 
 
-$(function() {
-    init();
-    $("#loginSubmit").click(function(event) {
-	event.preventDefault();
-	sendLoginData();
-    });
-});

@@ -12,12 +12,21 @@
 
 
         <h1>Lobby</h1>
+		<form id="signup">
+            Signup For a new account!!<br/>
+            Name: <input type="text" id="signupname"/>
+            Password: <input type="password" id="signuppassword" />
+            <input  type="submit" id="signupSubmit" value="Submit"  />
+        </form>
+		<h2 id="signupSubmitted"></h2>
+
         <form id="login">
             (Hint try username: "Eli", password: "b")<br/>
             Name: <input type="text" id="name"/>
             Password: <input type="password" id="password" />
             <input  type="submit" id="loginSubmit" value="Submit"  />
         </form>
+		
         <div id="submitted"></div>
         <div id="complete"></div>
 	<div id="games">
