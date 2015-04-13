@@ -6,7 +6,7 @@ console.log("yo");
 //asks for unique game id
 cardConverterArray = [];
 requestTimer = null;
-requestDelay = 500; //ms
+requestDelay = 5000; //ms
 gameDiv = null;
 
 boardWidth = 7;
@@ -82,7 +82,7 @@ function init() {
 		data: JSON.stringify(requestObj),
 		    success: function (data, textStatus, jqXHR) {
 			handleUpdate(data);
-			stateNum ++; //should actually read stateNum value from data
+			stateNum; //should actually read stateNum value from data
 		     }
         });
     },requestDelay);    

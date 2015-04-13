@@ -75,7 +75,7 @@ function addGame() {
 }
 
 function addToGameTable(id,name) {
-    $("#gamesTable").prepend("<tr data-id=" + id + "><td>" + name + "</td></tr>");
+    $("#gamesTable").prepend("<tr data-id=" + id + "><td><a href=\'/game/?gid="+id+"&uid="+uid+"\'>" + name + "</a></td></tr>");
 }
 
 //idList - uuids of currently active games
