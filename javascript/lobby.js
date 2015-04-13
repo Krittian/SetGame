@@ -79,8 +79,9 @@ function sendLoginData(name, password) {
 		 userinfo = data["userinfo"];
 		 currGameIds = data["gameIds"];
 		 currGameNames = data["gameNames"];
-		 currGamePlayerCounts  = data["currGamePlayerCounts"];
+		 currGamePlayerCounts  = data["gamePlayerCounts"];
 		 uid = data["uid"];
+		 console.log(data);
 		 refreshGameTable(currGameIds,currGameNames, currGamePlayerCounts);
 	     } else {
 		 $("#submitted").text("invalid username or password. try again.");

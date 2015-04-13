@@ -76,7 +76,7 @@ public class LobbyHandler extends ResponseHandler {
 					gameIdArray[i] = (String) g.getID();
 					gameNameArray[i] = g.getName();
 					gamePlayerCountsArray[i] = g.getPlayers().length;
-					System.out.print("_ABC:__" + g.getPlayers().length);
+					System.out.print("_ABC:__" + g.getID() + " " + g.getName()+ " " +  g.getPlayers().length);
 					i++;
 				}
 				ret.put("gameIds", gameIdArray);
