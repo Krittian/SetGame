@@ -63,14 +63,15 @@ function init() {
 
     requestTimer = window.setInterval(function () {
 	
-
+	//true when stateNum == -1 just to get state of game when a player first enters game
 	if (hasUpdate || stateNum == -1) {
 		requestObj = {uid:uid,gameId:gid,set:currSelectedList,hasUpdate:hasUpdate,stateNum:stateNum};
 		console.log("udpate!");
 		console.log(requestObj);
 
-		
-		undoSetSelect();
+		if (hasUpdate) { //but only undo selection when there's an update	
+		    undoSetSelect();
+		}
 	} else {
 		requestObj = {gameId:gid,hasUpdate:hasUpdate, stateNum:stateNum};
 	}
