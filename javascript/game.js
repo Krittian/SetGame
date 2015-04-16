@@ -14,6 +14,7 @@ boardHeight = 3;
 boardGrid = null;
 
 uid = "";
+name = "";
 gid = "";
 
 currSelectedList = [];
@@ -24,6 +25,8 @@ hasUpdate = false; //this turns true when three cards are selected. At next requ
 function init() {
     gameDiv = $('#setboard');
     createGameBoard();
+	uid = getCookie("uid");
+	name = getCookie("name");
     getUrlParams();
     cardConverterArray = createCardArray();
     
@@ -66,8 +69,8 @@ function init() {
 	//true when stateNum == -1 just to get state of game when a player first enters game
 	if (hasUpdate || stateNum == -1) {
 		requestObj = {uid:uid,gameId:gid,set:currSelectedList,hasUpdate:hasUpdate,stateNum:stateNum};
-		console.log("udpate!");
-		console.log(requestObj);
+		//console.log("udpate!");
+		//console.log(requestObj);
 
 		if (hasUpdate) { //but only undo selection when there's an update	
 		    undoSetSelect();
@@ -137,7 +140,7 @@ function createGameBoard() {
 }
 
 function getUrlParams() {
-	uid = getUrlParam('uid');
+//	uid = getUrlParam('uid');using cookie instead
 	gid = getUrlParam('gid');
 }
 
@@ -184,6 +187,7 @@ function handleUpdate(data) {
 			tempCardCode = parseInt(cards[i],3); //trinary
 			x = i%boardWidth;
 			y = Math.floor(i/boardWidth);			
+			console.log("adding: " + x + " " + y);
 			addCard(tempCardCode,x,y);
 		}
 	}
@@ -202,3 +206,16 @@ function undoSetSelect() {
 $(function() {
     init();
 });
+
+function getCookie(cname) {
+    var name = cname + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0; i<ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1);
+        if (c.indexOf(name) == 0) return c.substring(name.length, c.length);
+    }
+    return "";
+}
+
+

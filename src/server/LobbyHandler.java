@@ -34,11 +34,99 @@ public class LobbyHandler extends ResponseHandler {
 	public static final int maxNameSize = 30;
 	private static final String GAME_DATA = "gameData";
 	private static final String JOIN_GAME_STRING = "!!!!!";
+	private static final String UID_SIGNIN = 	"uid_signin";
 
 	public LobbyHandler(GameHandler g) {
 		this.gamehandler = g;
 	}
 
+	private JSONObject addGameInfo(JSONObject ret){
+		int gameListSize = gamehandler.getGameList().size();
+		Object[] gameIdArray = new Object[gameListSize];
+		Object[] gameNameArray = new Object[gameListSize];
+		Integer [] gamePlayerCountsArray = new Integer [gameListSize];
+		int i = 0;
+		for (Game g : gamehandler.getGameList().values()) {
+			gameIdArray[i] = (String) g.getID();
+			gameNameArray[i] = g.getName();
+			gamePlayerCountsArray[i] = g.getPlayers().length;
+			i++;
+		}
+		ret.put("gameIds", gameIdArray);
+		ret.put("gameNames", gameNameArray);
+		ret.put("gamePlayerCounts", gamePlayerCountsArray);
+		return ret;
+	}
+	private JSONObject signup(JSONObject jsonMap){
+		JSONObject ret = new JSONObject();
+		JSONObject signup = jsonMap.getJSONObject(USER_SIGNUP);
+		String name = signup.getString(NAME_STRING);
+		String pwd = signup.getString(PWD_STRING);
+		System.out.println("lobbyHandler received (signup): " + name + ", " + pwd);
+		if(addUser(name, pwd) == 1){
+			ret.put(AUTH_STRING, true);
+		}else
+			ret.put(AUTH_STRING, false);
+		return ret;
+	}
+	
+		private JSONObject login(JSONObject jsonMap){
+		JSONObject ret = new JSONObject();
+		//          format of login_string {login: {name: ______, password: _____}}
+		//          therefore we need to unpack to JSONObject
+		JSONObject login = jsonMap.getJSONObject(LOGIN_STRING);
+		String name = login.getString(NAME_STRING);
+		String pwd = login.getString(PWD_STRING);
+		System.out.println("lobbyHandler received: " + name + ", " + pwd);
+		boolean checkUserBool = checkUser(name, pwd);// (name.equals("Eli") && pwd.equals("b"));
+		if (checkUserBool) {
+			ret.put(AUTH_STRING, true);
+			ret  = addGameInfo(ret);
+			String uuid = UUID.randomUUID().toString();
+			ret.put("uid", uuid);
+		} else {
+			ret.put(AUTH_STRING, false);
+		}
+		return ret;
+	}
+	
+	private JSONObject getGameData(JSONObject jsonMap){
+		JSONObject ret = new JSONObject();
+		System.out.println("lobbyHandler received In GAME_DATA: ");
+		JSONObject gameData = jsonMap.getJSONObject(GAME_DATA);
+		String uid = gameData.getString("uid");
+		String gameName = gameData.getString("gameName");
+		String requestType = gameData.getString("request");
+
+		if (requestType.equals(NEW_GAME_STRING)) {
+			String gameId = UUID.randomUUID().toString();
+			System.out.println("addding game: " + gamehandler.addGame(gameId, gameName));
+			ret.put("gameId", gameId);
+
+		} else if (requestType.equals(JOIN_GAME_STRING)) {
+			System.out.println("lobbyHandler received In JOIN_GAME_STRING: ");
+			ret.put("gameState", "you've joined a game!!");
+		}
+		System.out.println("lobbyHandler received In GAME_DATA: " + uid + ", " + gameName + ", " + requestType);
+		return ret;
+	}
+	
+private JSONObject uidSignin(JSONObject jsonMap){
+		JSONObject ret = new JSONObject();
+		JSONObject login = jsonMap.getJSONObject(UID_SIGNIN);
+		String uid = login.getString("uid");
+		System.out.println("Cookie: " + uid);
+		boolean checkUserBool = true;//checkUser(uid);// (name.equals("Eli") && pwd.equals("b"));
+		if (checkUserBool) {
+			ret.put(AUTH_STRING, true);
+			ret  = addGameInfo(ret);
+			ret.put("uid", uid);
+		} else {
+			ret.put(AUTH_STRING, false);
+		}
+		return ret;
+	}	
+	
 	@Override
 	public void handleRequest(JSONObject jsonMap, HttpExchange he) {
 		boolean sent = false;
@@ -46,67 +134,13 @@ public class LobbyHandler extends ResponseHandler {
 		JSONObject ret = new JSONObject();
 		//createTables();
 		if (jsonMap.has(USER_SIGNUP)) {
-			JSONObject signup = jsonMap.getJSONObject(USER_SIGNUP);
-			String name = signup.getString(NAME_STRING);
-			String pwd = signup.getString(PWD_STRING);
-			System.out.println("lobbyHandler received (signup): " + name + ", " + pwd);
-			if(addUser(name, pwd) == 1){
-				ret.put(AUTH_STRING, true);
-			}
-			else
-				ret.put(AUTH_STRING, false);
-		}
-		else if (jsonMap.has(LOGIN_STRING)) {
-			//          format of login_string {login: {name: ______, password: _____}}
-			//          therefore we need to unpack to JSONObject
-			JSONObject login = jsonMap.getJSONObject(LOGIN_STRING);
-			String name = login.getString(NAME_STRING);
-			String pwd = login.getString(PWD_STRING);
-			System.out.println("lobbyHandler received: " + name + ", " + pwd);
-			boolean checkUserBool = checkUser(name, pwd);// (name.equals("Eli") && pwd.equals("b"));
-			if (checkUserBool) {
-				ret.put(AUTH_STRING, true);
-				int gameListSize = gamehandler.getGameList().size();
-				System.out.println("gameListSize: " + gameListSize);
-				Object[] gameIdArray = new Object[gameListSize];
-				Object[] gameNameArray = new Object[gameListSize];
-				Integer [] gamePlayerCountsArray = new Integer [gameListSize];
-				int i = 0;
-				for (Game g : gamehandler.getGameList().values()) {
-					gameIdArray[i] = (String) g.getID();
-					gameNameArray[i] = g.getName();
-					gamePlayerCountsArray[i] = g.getPlayers().length;
-					System.out.print("_ABC:__" + g.getID() + " " + g.getName()+ " " +  g.getPlayers().length);
-					i++;
-				}
-				ret.put("gameIds", gameIdArray);
-				ret.put("gameNames", gameNameArray);
-				ret.put("gamePlayerCounts", gamePlayerCountsArray);
-				String uuid = UUID.randomUUID().toString();
-				ret.put("uid", uuid);
-			} else {
-				ret.put(AUTH_STRING, false);
-			}
+			ret = signup(jsonMap);
+		} else if (jsonMap.has(LOGIN_STRING)) {
+			ret = login(jsonMap);
 		} else if (jsonMap.has(GAME_DATA)) {
-			System.out.println("lobbyHandler received In GAME_DATA: ");
-			JSONObject gameData = jsonMap.getJSONObject(GAME_DATA);
-			String uid = gameData.getString("uid");
-			String gameName = gameData.getString("gameName");
-			String requestType = gameData.getString("request");
-
-			if (requestType.equals(NEW_GAME_STRING)) {
-				System.out.println("lobbyHandler received In NEW_GAME_STRING: ");
-				String gameId = UUID.randomUUID().toString();
-				System.out.println("addding game: " + gamehandler.addGame(gameId, gameName) + " ___" + gamehandler.getGameList().size());
-				
-				ret.put("gameId", gameId);
-
-			} else if (requestType.equals(JOIN_GAME_STRING)) {
-				System.out.println("lobbyHandler received In JOIN_GAME_STRING: ");
-				ret.put("gameState", "you've joined a game!!");
-			}
-			System.out.println("lobbyHandler received In GAME_DATA: " + uid + ", " + gameName + ", " + requestType);
-
+			ret = getGameData(jsonMap);
+		} else if (jsonMap.has(UID_SIGNIN)){
+			ret = uidSignin(jsonMap);
 		}
 		this.sendJSON(ret, he);
 	}
@@ -197,6 +231,7 @@ public class LobbyHandler extends ResponseHandler {
 					//"uid int NOT NULL AUTO_INCREMENT," +
 					"name CHAR(" + maxNameSize + ")," +
 					"password TEXT," +
+					"uid TEXT," + 
 					//"ssn CHAR(10)," +//don't need it, but if they give us it, why wouldn't we store it.
 					"PRIMARY KEY(name)" +
 					//"UNIQUE (name)" +

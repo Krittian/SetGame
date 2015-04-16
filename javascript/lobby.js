@@ -7,8 +7,47 @@ $(function() {
     init();
 });
 
+
+function signInWithCookies(){
+	uid1 = getCookie("uid");
+	if(uid1 != ""){//try to login using uid cookie
+		var userdata = {
+	 uid: uid1
+	 };
+     $.ajax({
+	 type: "POST",
+	 url: "/lobbyDATA",
+	 dataType: "json",
+	 contentType: 'application/json; charset=UTF-8',
+	 data: JSON.stringify({uid_signin: userdata}),
+	 success: function (data, textStatus, jqXHR) {
+			goodCookieOrLogin(data);
+		}
+	 });
+	}
+}
+
+function displaySignup(){
+	$("#signup").show();
+	$("#login").hide();	
+	$("#displaySignup").hide();//	text("BOB");//
+	$("#displayLogin").show();	
+}
+
+function displayLogin(){
+	$("#signup").hide();
+	$("#login").show();	
+	$("#displaySignup").show();	
+	$("#displayLogin").hide();	
+}
+
 function init() {
-    console.log("init");
+	$("#signup").hide();
+	$("#logout").hide();
+	$("#displayLogin").hide();
+    $("#games").hide();
+
+	
 	$("#loginSubmit").click(function(event) {
 		event.preventDefault();
 		name = document.getElementById("name").value;
@@ -19,8 +58,41 @@ function init() {
 		event.preventDefault();
 		sendSignupData();
     });
-    $("#games").hide();
+	
+	
+	signInWithCookies();
 }
+
+function setCookie(cname, cvalue) {
+   // var d = new Date();
+    //d.setTime(d.getTime() + (exdays*24*60*60*1000));
+    //var expires = "expires="+d.toUTCString();
+    document.cookie = cname + "=" + cvalue + "; ";// + expires;
+} 
+
+function deleteCookie( name ) {
+  document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+}
+
+function logout(){
+	$("#displaySignup").hide();
+	$("#logout").hide();
+	deleteCookie("uid");
+	deleteCookie("name");
+	location.reload();
+}
+
+function getCookie(cname) {
+    var name = cname + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0; i<ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1);
+        if (c.indexOf(name) == 0) return c.substring(name.length, c.length);
+    }
+    return "";
+}
+
 function requestGameListData() {
     $.ajax({
 	type: "POST",
@@ -52,11 +124,29 @@ function requestGameListData() {
 		 $("#signupSubmitted").text(userdata["name"] +", you signed up successfully!");
 		 sendLoginData(userdata["name"],userdata["password"]);
 	     } else {
-		 $("#signupSubmitted").text("There was a problem...  Make sure your name/password combo is correct.");
+		 $("#signupSubmitted").text("There was a problem... Try another username.");
 	     }
 	}
     });
 }
+ 
+function goodCookieOrLogin(data){
+	 $("#login").hide();
+	 $("#logout").show();
+	 $("#displaySignup").hide();
+	 $("#signup").hide();
+	 $("#games").show();
+	 name = getCookie("name");
+	 $("#submitted").text("Welcome back " + name +"!");
+	 userinfo = data["userinfo"];
+	 currGameIds = data["gameIds"];
+	 currGameNames = data["gameNames"];
+	 currGamePlayerCounts  = data["gamePlayerCounts"];
+	 uid = data["uid"];
+	 setCookie("uid",uid);
+	 setCookie("name",name);
+	 refreshGameTable(currGameIds,currGameNames, currGamePlayerCounts);
+ }
  
 function sendLoginData(name, password) {
     console.log("yoooo");
@@ -72,17 +162,8 @@ function sendLoginData(name, password) {
 	 data: JSON.stringify({login: userdata}),
 	 success: function (data, textStatus, jqXHR) {
 	     if (data["authentication"] === true) {
-		 $("#login").hide();
-		 $("#signup").hide();
-		 $("#games").show();
-		 $("#submitted").text("Welcome back " + userdata["name"]+"!");
-		 userinfo = data["userinfo"];
-		 currGameIds = data["gameIds"];
-		 currGameNames = data["gameNames"];
-		 currGamePlayerCounts  = data["gamePlayerCounts"];
-		 uid = data["uid"];
-		 console.log(data);
-		 refreshGameTable(currGameIds,currGameNames, currGamePlayerCounts);
+			setCookie("name",userdata["name"]);
+			goodCookieOrLogin(data);
 	     } else {
 		 $("#submitted").text("invalid username or password. try again.");
 	     }
@@ -116,7 +197,7 @@ function addGame() {
 }
 
 function addToGameTable(id,name,count) {
-    $("#gamesTable").prepend("<tr data-id=" + id + "><td><a href=\'/game/?gid="+id+"&uid="+uid+"\'>" + name + "</a> Number of Players: " + count + "</td></tr>");
+    $("#gamesTable").prepend("<tr data-id=" + id + "><td><a href=\'/game/?gid="+id + "\'>" + name + "</a> Number of Players: " + count + "</td></tr>");
 }
 
 //idList - uuids of currently active games
