@@ -1,1 +1,2 @@
-/usr/share/java/mysql-connector=java.jar
+josh is not working on it now.
+

@@ -22,6 +22,9 @@ currSelectedCells = []; //corresponding list to html elems that you clicked on
 stateNum = -1; //initialized to -1 so that when you start up game, you automattically get an update
 hasUpdate = false; //this turns true when three cards are selected. At next request to server, it is set to false.
 
+//used to map trinary number to card picture file locations
+setCardMap = [["one","two","three"],["green","purple","red"],["diamond","oval","wavy"],["solid","clear","shaded"]];
+
 function init() {
     gameDiv = $('#setboard');
     createGameBoard();
@@ -33,11 +36,11 @@ function init() {
     //initBoard
     deleteBoard();
     
-    addCard(72,6,2);
-    addCard(43,0,0);
-    addCard(56,4,1);
+    //addCard(72,6,2);
+    //addCard(43,0,0);
+    //addCard(56,4,1);
     //eventHandlers
-    $('.setCard').click(function() {
+    $('#setboard').on('click','.setCard',function() {
 	cell = $(this).parent();
         x = cell.data('x');
         y = cell.data('y');
@@ -158,9 +161,18 @@ function getUrlParam(sParam)
     }
 } 
 
-function addCard(cardCode,x,y) {
-    $("td[data-x=" + x + "][data-y=" + y + "]").append('<div class=setCard data-cardcode=' + cardCode + '>'+ cardCode + '</div>');
-    boardGrid[x][y] = cardCode;
+function addCard(trinCardCode,decCardCode,x,y) {
+    removeCard(x,y);
+    //$("td[data-x=" + x + "][data-y=" + y + "]").append('<div class=setCard data-cardcode=' + cardCode + '>'+ cardCode + '</div>');
+    picPath = "/setCards";
+    for (i = 0; i < 4; i++) {
+        paramChoices = setCardMap[i];
+        currTrigit = parseInt((""+trinCardCode).charAt(i));
+        picPath = picPath + "/" + paramChoices[currTrigit];   
+    }
+    picPath += "/card.PNG";
+    $("td[data-x=" + x + "][data-y=" + y + "]").append('<img data-cardcode=' + decCardCode + ' src=' + picPath + '></img>');
+    boardGrid[x][y] = decCardCode;
 }
 
 function removeCard(x,y) {
@@ -188,7 +200,7 @@ function handleUpdate(data) {
 			x = i%boardWidth;
 			y = Math.floor(i/boardWidth);			
 			console.log("adding: " + x + " " + y);
-			addCard(tempCardCode,x,y);
+			//addCard(cards[i],tempCardCode,x,y);
 		}
 	}
 }
