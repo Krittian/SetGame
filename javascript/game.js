@@ -35,18 +35,19 @@ function init() {
     
     //initBoard
     deleteBoard();
-    
+    addCard("0000",3,3); 
     //addCard(72,6,2);
     //addCard(43,0,0);
     //addCard(56,4,1);
     //eventHandlers
-    $('#setboard').on('click','.setCard',function() {
+    $('#setboard').on('click','img',function() {
 	cell = $(this).parent();
         x = cell.data('x');
         y = cell.data('y');
         console.log("clicked x:" + x + " y:" + y);
 	
-	cardCode = cell.find('.setCard').data('cardcode');
+	cardCode = cell.find('img').data('cardcode');
+        console.log('code: ' + cardCode);
 	cardIndex = currSelectedList.indexOf(cardCode);
 	if (cardIndex == -1) {
 		cell.css('background','yellow');
@@ -161,17 +162,19 @@ function getUrlParam(sParam)
     }
 } 
 
-function addCard(trinCardCode,decCardCode,x,y) {
+function addCard(trinCardCode,x,y) {
+    decCardCode = parseInt(trinCardCode,3); //trinary
     removeCard(x,y);
     //$("td[data-x=" + x + "][data-y=" + y + "]").append('<div class=setCard data-cardcode=' + cardCode + '>'+ cardCode + '</div>');
     picPath = "/setCards";
-    for (i = 0; i < 4; i++) {
-        paramChoices = setCardMap[i];
-        currTrigit = parseInt((""+trinCardCode).charAt(i));
+    for (j = 0; j < 4; j++) {
+        paramChoices = setCardMap[j];
+        currTrigit = parseInt(trinCardCode.charAt(j));
         picPath = picPath + "/" + paramChoices[currTrigit];   
     }
     picPath += "/card.PNG";
-    $("td[data-x=" + x + "][data-y=" + y + "]").append('<img data-cardcode=' + decCardCode + ' src=' + picPath + '></img>');
+    console.log(picPath);
+    $("td[data-x=" + x + "][data-y=" + y + "]").append('<img data-cardcode=' + decCardCode + ' src='+picPath+' ></img>');
     boardGrid[x][y] = decCardCode;
 }
 
@@ -196,11 +199,10 @@ function handleUpdate(data) {
 		stateNum = data["stateNum"];
 		cards = data["cards"];
 		for (i = 0; i < cards.length; i++) {
-			tempCardCode = parseInt(cards[i],3); //trinary
 			x = i%boardWidth;
 			y = Math.floor(i/boardWidth);			
-			console.log("adding: " + x + " " + y);
-			//addCard(cards[i],tempCardCode,x,y);
+			console.log("adding: " + x + " " + y + " cardCode: " + cards[i]);
+			addCard(cards[i],x,y);
 		}
 	}
 }
