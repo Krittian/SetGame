@@ -60,6 +60,7 @@ public class WebServer2 {
         GameHandler g = new GameHandler();
         ws.addService("/gameDATA", g);
         ws.addService("/lobbyDATA", new LobbyHandler(g));
+        ws.addService("/socketDATA", new SocketHandler());
         ws.start();
 //        Game g = new Game();
     }
