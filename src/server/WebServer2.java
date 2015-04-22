@@ -65,6 +65,13 @@ public class WebServer2 {
     }
 }
 
+class SocketHandler implements HttpHandler { 
+    
+    public void handle(HttpExchange he) throws IOException {
+	he.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
+    }
+
+}
 class FileHandler implements HttpHandler {
 
     private byte[] buf;
