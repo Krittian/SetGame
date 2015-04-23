@@ -64,38 +64,29 @@ public class Game {
 		}
 		add3Cards(); // ensure outCards contains a set
 	}*/
-
+	/**
+	 * Initializes the cards that are out, making sure that there is at least
+	 * one set on the board
+	 */
 	private void fillOutCards(){
-		fillOutCards(-1,-1,-1);
+		while((outCards.size() <12 || !outContainsSet())){
+			add3Cards(-1,-1,-1);
+		}
 	}
 	
 	private void fillOutCards(int c1, int c2, int c3){
-		int sub = 0;
-		if(c1 != -1) sub++;
-		if(c2 != -1) sub++;
-		if(c3 != -1) sub++;
-		if(sub != 0 && sub != 3)
-			System.out.println("NEVER SHOULD HAPPEN");
-		
-		if(deck.size() <3){
+		if(outCards.size()>12){
 			try{
 				outCards.remove(c1);
 				outCards.remove(c2);
 				outCards.remove(c3);
-			}catch(Exception e){
-				System.err.println("delete failed");
-				;
-			}
-			System.out.println("THE GAME IS OVER MAN!!!! GIVE UP.");
-			return;
+			}catch(Exception e){System.err.println("delete failed");}
+			System.out.println("more then 12 cards last time");
+		}else{
+			add3Cards(c1, c2, c3);//replace the cards (or delete if non left in deck)			
 		}
-		while(outCards.size() - sub <12 || !outContainsSet()){
-			System.out.println("party!!");
-			add3Cards(c1, c2, c3);
-			c1 = -1;
-			c2 = -1;
-			c3 = -1;
-			sub = 0;
+		while(!outContainsSet() && deck.size()>0){
+			add3Cards(-1,-1,-1);
 		}
 	}
 	
@@ -195,6 +186,12 @@ public class Game {
 		System.out.println("DESK SIZE: " + deck.size());
 		incrementStateNum();
 		Integer [] c = new Integer []{ c1, c2, c3}; 
+		if(deck.size() <3){
+			for(int i=0;i<3;i++){
+				if(c[i] != -1) outCards.remove(c[i]);
+			}
+			return;
+		}
 		Random rnd = new Random();
 		for (int i = 0; i < 3; i++) {
 			int index = rnd.nextInt(81);
@@ -203,7 +200,6 @@ public class Game {
 				System.out.println("index: " + index);
 			}
 			String card = deck.remove(index);
-			
 			System.out.println(c[i] + " __ " + card);
 
 			if(c[i] == -1) outCards.add(card);
@@ -280,6 +276,14 @@ public class Game {
 	private int getCardIndex(String card) {
 		return Integer.valueOf(card, 3);
 	}
+	
+	public String[] getPlayerNames() {
+		String[] p = getPlayers();
+		for(int i=0; i<p.length;i++){
+			p[i] = LobbyHandler.checkUser(p[i]);
+		}
+		return p;
+	}
 
 	public String[] getPlayers() {
 		String[] p = new String[players.keySet().size()];
@@ -287,11 +291,20 @@ public class Game {
 		return p;
 	}
 
+	public Integer[] getPlayerScores() {
+		String[] p = new String[players.keySet().size()];
+		players.keySet().toArray(p);
+		Integer [] scores = new Integer[p.length];
+		for(int i=0; i<p.length;i++){
+			scores[i] = players.get(p[i]).size();
+		}
+		return scores;
+	}
+	
 	/***
 	 * @return true if adding new player, false if player was already there.
 	 */
 	public boolean addPlayer(String uid){
-
 		if(players.containsKey(uid))
 			return false;
 		players.put(uid, new ArrayList<String>());

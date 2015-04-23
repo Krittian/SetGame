@@ -50,7 +50,7 @@ function init() {
 	
 	$("#loginSubmit").click(function(event) {
 		event.preventDefault();
-		name = document.getElementById("name").value;
+		name = document.getElementById("name").value.replace(/ /g, "_");
 		password = document.getElementById("password").value;
 		sendLoginData(name,password);
     });
@@ -172,7 +172,7 @@ function sendLoginData(name, password) {
 }
 
 function addGame() {
-    gameName = $("#newgamename").val();
+    gameName = $("#newgamename").val().replace(/ /g, "_");
     if (gameName == "") {
 	$("#newgameerror").text("Please enter a name");
 	return;
@@ -203,7 +203,7 @@ function getGameLink(id){
 }
 
 function addToGameTable(id,name,count) {
-    $("#gamesTable").prepend("<tr data-id=" + id + "><td><a href=\'" + getGameLink(id) + "\'>" + name + "</a> Number of Players: " + count + "</td></tr>");
+    $("#gamesTable").prepend("<tr data-id=" + id + "><td><a href=\'" + getGameLink(id) + "\'>" + name.replace(/_/g," ") + "</a> Number of Players: " + count + "</td></tr>");
 }
 
 //idList - uuids of currently active games

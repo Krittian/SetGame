@@ -39,6 +39,25 @@ public class LobbyHandler extends ResponseHandler {
 	public LobbyHandler(GameHandler g) {
 		this.gamehandler = g;
 	}
+	
+	@Override
+	public void handleRequest(JSONObject jsonMap, HttpExchange he) {
+		boolean sent = false;
+		getConnection();
+		JSONObject ret = new JSONObject();
+		//createTables();
+		if (jsonMap.has(USER_SIGNUP)) {
+			ret = signup(jsonMap);
+		} else if (jsonMap.has(LOGIN_STRING)) {
+			ret = login(jsonMap);
+		} else if (jsonMap.has(GAME_DATA)) {
+			ret = getGameData(jsonMap);
+		} else if (jsonMap.has(UID_SIGNIN)){
+			ret = uidSignin(jsonMap);
+		}
+		this.sendJSON(ret, he);
+	}
+
 
 	private JSONObject addGameInfo(JSONObject ret){
 		int gameListSize = gamehandler.getGameList().size();
@@ -88,12 +107,11 @@ public class LobbyHandler extends ResponseHandler {
 		String name = login.getString(NAME_STRING);
 		String pwd = login.getString(PWD_STRING);
 		System.out.println("lobbyHandler received: " + name + ", " + pwd);
-		boolean checkUserBool = checkUser(name, pwd);// (name.equals("Eli") && pwd.equals("b"));
-		if (checkUserBool) {
+		String uid = checkUser(name, pwd);// (name.equals("Eli") && pwd.equals("b"));
+		if (!uid.equals("")) {
 			ret.put(AUTH_STRING, true);
 			ret  = addGameInfo(ret);
-			String uuid = UUID.randomUUID().toString();
-			ret.put("uid", uuid);
+			ret.put("uid", uid);
 		} else {
 			ret.put(AUTH_STRING, false);
 		}
@@ -111,8 +129,8 @@ public class LobbyHandler extends ResponseHandler {
 		if (requestType.equals(NEW_GAME_STRING)) {
 			//Check if there already is a game with that name (if so, just go to that game):
 			String gameId = getGameID(gameName);
-			if(gameId.equals("")){//teh game doesn't exist yet
-				gameId = UUID.randomUUID().toString();
+			if(gameId.equals("")){//the game doesn't exist yet
+				gameId = gameName;//UUID.randomUUID().toString();
 				System.out.println("adding game: " + gamehandler.addGame(gameId, gameName));
 			}		
 			ret.put("gameId", gameId);
@@ -130,8 +148,8 @@ private JSONObject uidSignin(JSONObject jsonMap){
 		JSONObject login = jsonMap.getJSONObject(UID_SIGNIN);
 		String uid = login.getString("uid");
 		System.out.println("Cookie: " + uid);
-		boolean checkUserBool = true;//checkUser(uid);// (name.equals("Eli") && pwd.equals("b"));
-		if (checkUserBool) {
+		String name = checkUser(uid);// (name.equals("Eli") && pwd.equals("b"));
+		if (!name.equals("")) {
 			ret.put(AUTH_STRING, true);
 			ret  = addGameInfo(ret);
 			ret.put("uid", uid);
@@ -141,25 +159,8 @@ private JSONObject uidSignin(JSONObject jsonMap){
 		return ret;
 	}	
 	
-	@Override
-	public void handleRequest(JSONObject jsonMap, HttpExchange he) {
-		boolean sent = false;
-		getConnection();
-		JSONObject ret = new JSONObject();
-		//createTables();
-		if (jsonMap.has(USER_SIGNUP)) {
-			ret = signup(jsonMap);
-		} else if (jsonMap.has(LOGIN_STRING)) {
-			ret = login(jsonMap);
-		} else if (jsonMap.has(GAME_DATA)) {
-			ret = getGameData(jsonMap);
-		} else if (jsonMap.has(UID_SIGNIN)){
-			ret = uidSignin(jsonMap);
-		}
-		this.sendJSON(ret, he);
-	}
 
-	private Connection getConnection(){
+	private static Connection getConnection(){
 
 		Connection con = null;
 		try{
@@ -177,9 +178,10 @@ private JSONObject uidSignin(JSONObject jsonMap){
 		return con;
 	}
 
-	private boolean checkUser(String name, String password) {
+	private String checkUser(String name, String password) {
 		Connection c = getConnection();
 		PreparedStatement  stmt =null;
+		String uid ="";
 		try{
 			String sql = "SELECT * FROM Users WHERE name=? AND password=?;";	
 			stmt = c.prepareStatement(sql);
@@ -187,37 +189,69 @@ private JSONObject uidSignin(JSONObject jsonMap){
 			stmt.setString(2, password);
 			ResultSet rs = stmt.executeQuery();
 			int count = 0;
-			boolean isGood = false;
 			while ( rs.next() )
 			{
 				count++;
-				if(name.equals(rs.getString("name")))
-					isGood = true;
+				if(name.equals(rs.getString("name"))){
+					uid = rs.getString("uid");
+				}
 			}
 			rs.close();
 			stmt.close();
 			c.close();
-			if(count ==1 && isGood)//count is 1 to help make sure there's no funny bussiness of getting all the rows 
-				return true;
+			if(count ==1)//count is 1 to help make sure there's no funny bussiness of getting all the rows 
+				return uid;
 		}catch(Exception e){
 			e.printStackTrace();			
 		}
-		return false;
+		return "";
+	}
+
+	
+
+	public  static String checkUser(String uid) {
+		Connection c = getConnection();
+		PreparedStatement  stmt =null;
+		String name ="";
+		try{
+			String sql = "SELECT * FROM Users WHERE uid=?;";	
+			stmt = c.prepareStatement(sql);
+			stmt.setString(1, uid);
+			ResultSet rs = stmt.executeQuery();
+			int count = 0;
+			while ( rs.next() )
+			{
+				count++;
+				name= rs.getString("name");	
+			}
+			rs.close();
+			stmt.close();
+			c.close();
+			if(count ==1)//count is 1 to help make sure there's no funny bussiness of getting all the rows 
+				return name;
+		}catch(Exception e){
+			e.printStackTrace();			
+		}
+		return "";
 	}
 
 
 	/**
-	 * returns 1 on success and -1 on fail (b/c the name is already in there), or -2 for other fail
+	 * @return 1 on success and -1 on fail (b/c the name is already in there), or -2 for other fail, -3 on bad name/passwords
 	 */
 	private int addUser(String name, String password){
+		if(name.length()<1 || password.length()<1)
+			return -3;
 		//password = MD5;
 		Connection c = getConnection();
 		PreparedStatement  stmt =null;
+		String uid = UUID.randomUUID().toString();
 		try{
-			String sql = "INSERT INTO Users(name, password) VALUES(?,?);";	
+			String sql = "INSERT INTO Users(name, password,uid) VALUES(?,?,?);";	
 			stmt = c.prepareStatement(sql);
 			stmt.setString(1, name);
 			stmt.setString(2, password);
+			stmt.setString(3, uid);
 			int returnVal = stmt.executeUpdate();
 			stmt.close();
 			c.close();

@@ -47,6 +47,8 @@ public class GameHandler extends ResponseHandler {
         JSONArray outcards = new JSONArray(g.getOutCards(false));
         ret.put("cards", outcards);
         ret.put("stateNum", g.getStateNum());
+        ret.put("players", g.getPlayerNames());
+        ret.put("playerScores", g.getPlayerScores());
         return ret;
     }
 

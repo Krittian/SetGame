@@ -78,9 +78,9 @@ function init() {
 	//true when stateNum == -1 just to get state of game when a player first enters game
 	if (hasUpdate || stateNum == -1) {
 		requestObj = {uid:uid,gameId:gid,set:currSelectedList,hasUpdate:hasUpdate,stateNum:stateNum};
-		console.log("trying to send set");
-		console.log("stateNum" + stateNum);
-		console.log(JSON.stringify(requestObj));
+		//console.log("trying to send set");
+		//console.log("stateNum" + stateNum);
+		//console.log(JSON.stringify(requestObj));
 		//console.log("udpate!");
 		//console.log(requestObj);
 
@@ -180,6 +180,18 @@ function createGameBoard() {
     }
 }
 
+function createUserBoard(players,scores) {
+    userTable = $("#userboard");
+	table = "<tr><th colspan='2'><b>" + gid.replace(/_/g," ") + "</b></th><tr><tr><th>Players</th><th>Scores</th></tr>";
+	for (i=0;i<players.length; i++) {
+	    table = table + "<tr><td>" + players[i] + "</td><td>" + scores[i] + "</td></tr>";
+	}
+	//table += "</table>"
+	console.log(table);
+	userTable.html (table);
+}
+
+
 function getUrlParams() {
 //	uid = getUrlParam('uid');using cookie instead
 	gid = getUrlParam('gid');
@@ -226,6 +238,8 @@ function deleteBoard() {
         boardGrid[i] = new Array(boardHeight);
         for (j = 0; j < boardHeight; j++) {
             boardGrid[i][j] = -1;
+	    //console.log('removdfdfdf');
+	    removeCard(i,j);
         }
     }
 }
@@ -237,10 +251,20 @@ function handleUpdate(data) {
 		if(stateNum == undefined)
 			stateNum = -1;
 		cards = data["cards"];
+		players = data["players"];
+		playerScores= data["playerScores"];
+
+		console.log("players: " + players);
+		console.log("playerScores: " + playerScores);
+		createUserBoard(players,playerScores);
+		if (cards.length < 12) {
+			console.log("END GAME STATE");
+			//remove all cards before adding them
+		}
 		for (i = 0; i < cards.length; i++) {
 			x = i%boardWidth;
 			y = Math.floor(i/boardWidth);			
-			console.log("adding: " + x + " " + y + " cardCode: " + cards[i]);
+			//console.log("adding: " + x + " " + y + " cardCode: " + cards[i]);
 			addCard(cards[i],x,y);
 		}
 	}
