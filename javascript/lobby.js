@@ -190,14 +190,20 @@ function addGame() {
 	contentType: "application/json; charset=UTF-8",
 	data: JSON.stringify({gameData: newGameData}),
 	success: function (data, textStatus, jqXHR0 ) {
+		// go stright to the game
 	    gameId = data["gameId"];
-	    addToGameTable(gameId,gameName);
+	    //addToGameTable(gameId,gameName);
+		window.location.href =  getGameLink(gameId);
 	}
     });
 }
 
+function getGameLink(id){
+	return '/game/?gid=' +id;
+}
+
 function addToGameTable(id,name,count) {
-    $("#gamesTable").prepend("<tr data-id=" + id + "><td><a href=\'/game/?gid="+id + "\'>" + name + "</a> Number of Players: " + count + "</td></tr>");
+    $("#gamesTable").prepend("<tr data-id=" + id + "><td><a href=\'" + getGameLink(id) + "\'>" + name + "</a> Number of Players: " + count + "</td></tr>");
 }
 
 //idList - uuids of currently active games

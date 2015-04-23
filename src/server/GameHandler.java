@@ -46,35 +46,54 @@ public class GameHandler extends ResponseHandler {
         
         JSONArray outcards = new JSONArray(g.getOutCards(false));
         ret.put("cards", outcards);
-        ret.put("statenum", g.getStateNum());
+        ret.put("stateNum", g.getStateNum());
         return ret;
     }
 
     @Override
     public void handleRequest(JSONObject jsonMap, HttpExchange he) {
-        System.out.println("\nGameHandler received: " + jsonMap.toString());
-        JSONObject ret = new JSONObject();
-        if (jsonMap.has("hasUpdate") 
-                && jsonMap.has("stateNum") 
-                && jsonMap.has("gameId")) {
+    	
+        //System.out.println("\nGameHandler received: " + jsonMap.toString());
+               
+    	JSONObject ret = new JSONObject();
+    	if (jsonMap.has("leaveGame")){
+            
+
+        	String gID = jsonMap.getString("gameId");
+            String uid = jsonMap.getString("uid");
+            System.out.println( uid + " LEAVING "  + gID);
+            Game g = gameList.get(gID);
+            g.removePlayer(uid);
+        	
+        }
+    	else if (jsonMap.has("hasUpdate") && jsonMap.has("stateNum") && jsonMap.has("gameId")) {
+    		//System.out.println("here: hasUPdate and statenum and gameId ");
             String gID = jsonMap.getString("gameId");
             int state = jsonMap.getInt("stateNum");
+            String uid = jsonMap.getString("uid");
             Game g = gameList.get(gID);
+            g.addPlayer(uid);
             if(state < g.getStateNum()) {
-                ret = sendGame(gID);
+            	System.out.println("state < server state" + state + " g.->  " + g.getStateNum());
+                ret = sendGame(g);
                 ret.put("hasUpdate", true);
             } else if(jsonMap.getBoolean("hasUpdate")) {
+            	System.out.println("has update 2... checking set");
                 JSONArray set = jsonMap.getJSONArray("set");
-                String uid = jsonMap.getString("uid");
-                if(g.checkSet(uid, set.getString(0), set.getString(1), set.getString(2))) {
+                if(set.length() == 3 && g.checkSet(uid, set.getInt(0), set.getInt(1), set.getInt(2))) {
+                	System.out.println("valid SET!!");
                     ret = sendGame(g);
                     ret.put("hasUpdate", true);
                 }
-                ret.put("hasUpdate", false);
+                else{
+                	System.out.println("dumb SET");
+                	ret.put("hasUpdate", false);
+                }
             } else {
+            	//System.out.println("has no update");
                 ret.put("hasUpdate", false);
             }
-        }
+        } 
         // send an empty json string {} until we do something else.
         this.sendJSON(ret, he);
     }

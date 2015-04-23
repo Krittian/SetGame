@@ -66,13 +66,6 @@ public class WebServer2 {
     }
 }
 
-class SocketHandler implements HttpHandler { 
-    
-    public void handle(HttpExchange he) throws IOException {
-	he.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
-    }
-
-}
 class FileHandler implements HttpHandler {
 
     private byte[] buf;
@@ -119,12 +112,12 @@ class FileHandler implements HttpHandler {
                 File ind = new File(f, "index.html");
                 f = ind;
             }
-            props.log(f.getAbsolutePath());
+            //props.log(f.getAbsolutePath());
 
             printFileHeaders(f, he);
             try (OutputStream responseBody = he.getResponseBody()) {
                 sendFile(f, responseBody);
-                props.log("sent file");
+                //props.log("sent file");
             }
         }
     }

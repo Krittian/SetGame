@@ -6,7 +6,7 @@ console.log("yo");
 //asks for unique game id
 cardConverterArray = [];
 requestTimer = null;
-requestDelay = 5000; //ms
+requestDelay = 100; //ms
 gameDiv = null;
 
 boardWidth = 7;
@@ -25,7 +25,12 @@ hasUpdate = false; //this turns true when three cards are selected. At next requ
 //used to map trinary number to card picture file locations
 setCardMap = [["one","two","three"],["green","purple","red"],["diamond","oval","wavy"],["solid","clear","shaded"]];
 
+$(function() {
+    init();
+});
+
 function init() {
+	console.log("sateNUm " + stateNum);
     gameDiv = $('#setboard');
     createGameBoard();
 	uid = getCookie("uid");
@@ -73,6 +78,9 @@ function init() {
 	//true when stateNum == -1 just to get state of game when a player first enters game
 	if (hasUpdate || stateNum == -1) {
 		requestObj = {uid:uid,gameId:gid,set:currSelectedList,hasUpdate:hasUpdate,stateNum:stateNum};
+		console.log("trying to send set");
+		console.log("stateNum" + stateNum);
+		console.log(JSON.stringify(requestObj));
 		//console.log("udpate!");
 		//console.log(requestObj);
 
@@ -80,8 +88,9 @@ function init() {
 		    undoSetSelect();
 		}
 	} else {
-		requestObj = {gameId:gid,hasUpdate:hasUpdate, stateNum:stateNum};
+		requestObj = {uid:uid,gameId:gid,hasUpdate:hasUpdate, stateNum:stateNum};
 	}
+
 	$.ajax({
 		type: "POST",
 		url: "/gameDATA",
@@ -90,13 +99,41 @@ function init() {
 		data: JSON.stringify(requestObj),
 		    success: function (data, textStatus, jqXHR) {
 			handleUpdate(data);
-			stateNum; //should actually read stateNum value from data
+			//stateNum; //should actually read stateNum value from data
 		     }
         });
     },requestDelay);    
 
+
+	
     
 }
+
+	//
+function leaveGame(){
+	//TODO tell server you want to leave the game.
+	requestObj = {uid:uid,gameId:gid,leaveGame:true};
+	$.ajax({
+		type: "POST",
+		url: "/gameDATA",
+		dataType: "json",
+		contentType: 'application/json; charset=UTF-8',
+		data: JSON.stringify(requestObj),
+		    success: function (data, textStatus, jqXHR) {
+			window.location.href = "/lobby";
+	     }
+        });
+	
+}
+
+/*
+window.onbeforeunload = function(){
+//alert("closing");
+return false;
+}
+*/
+
+
 
 //4D loop
 //creates strings with four letters. letters represent properties of each card
@@ -166,14 +203,14 @@ function addCard(trinCardCode,x,y) {
     decCardCode = parseInt(trinCardCode,3); //trinary
     removeCard(x,y);
     //$("td[data-x=" + x + "][data-y=" + y + "]").append('<div class=setCard data-cardcode=' + cardCode + '>'+ cardCode + '</div>');
-    picPath = "/setCards";
+    picPath = "http://ee.cooper.edu/~herzbe" + "/setCards";
     for (j = 0; j < 4; j++) {
         paramChoices = setCardMap[j];
         currTrigit = parseInt(trinCardCode.charAt(j));
         picPath = picPath + "/" + paramChoices[currTrigit];   
     }
     picPath += "/card.PNG";
-    console.log(picPath);
+    //console.log(picPath);
     $("td[data-x=" + x + "][data-y=" + y + "]").append('<img data-cardcode=' + decCardCode + ' src='+picPath+' ></img>');
     boardGrid[x][y] = decCardCode;
 }
@@ -197,6 +234,8 @@ function handleUpdate(data) {
 	if (data["hasUpdate"]) {
 		deleteBoard();
 		stateNum = data["stateNum"];
+		if(stateNum == undefined)
+			stateNum = -1;
 		cards = data["cards"];
 		for (i = 0; i < cards.length; i++) {
 			x = i%boardWidth;
@@ -217,9 +256,7 @@ function undoSetSelect() {
 	
 }
 
-$(function() {
-    init();
-});
+
 
 function getCookie(cname) {
     var name = cname + "=";

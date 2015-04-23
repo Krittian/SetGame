@@ -9,13 +9,12 @@ $(function() {
 	ws.onclose = function(event) {
 		console.log('Client notified socket has closed',event);
 	};
-	ws.onmessage=function(ev){
+	ws.onmessage=function(event){
 		console.log("got:"+ev.data);
 
 		ping();
 	};
 	function ping(){
-		lastMessage= + new Date;
 		ws.send("ping");
 	}
 });

@@ -57,6 +57,16 @@ public class LobbyHandler extends ResponseHandler {
 		ret.put("gamePlayerCounts", gamePlayerCountsArray);
 		return ret;
 	}
+	
+	private String getGameID(String gameName){
+		for (Game g : gamehandler.getGameList().values()) {
+			if(gameName.equals(g.getName())){
+				return (String) g.getID();
+			}
+		}
+		return "";
+	}
+	
 	private JSONObject signup(JSONObject jsonMap){
 		JSONObject ret = new JSONObject();
 		JSONObject signup = jsonMap.getJSONObject(USER_SIGNUP);
@@ -99,8 +109,12 @@ public class LobbyHandler extends ResponseHandler {
 		String requestType = gameData.getString("request");
 
 		if (requestType.equals(NEW_GAME_STRING)) {
-			String gameId = UUID.randomUUID().toString();
-			System.out.println("addding game: " + gamehandler.addGame(gameId, gameName));
+			//Check if there already is a game with that name (if so, just go to that game):
+			String gameId = getGameID(gameName);
+			if(gameId.equals("")){//teh game doesn't exist yet
+				gameId = UUID.randomUUID().toString();
+				System.out.println("adding game: " + gamehandler.addGame(gameId, gameName));
+			}		
 			ret.put("gameId", gameId);
 
 		} else if (requestType.equals(JOIN_GAME_STRING)) {

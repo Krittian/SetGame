@@ -7,6 +7,8 @@ package server;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.Date;
@@ -102,5 +104,14 @@ public abstract class ResponseHandler implements HttpHandler {
         } catch (IOException ex) {
             Logger.getLogger(ResponseHandler.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+    public byte[] sha1(String input) {
+	try { 
+		MessageDigest mDigest = MessageDigest.getInstance("SHA1");
+		return mDigest.digest(input.getBytes());
+	} catch (NoSuchAlgorithmException nsae) {
+		Logger.getLogger(ResponseHandler.class.getName()).log(Level.SEVERE, null, nsae);
+	}
+        return new byte[0]; 
     }
 }
