@@ -23,6 +23,7 @@ public class Game {
 	private String name;
 	private String ID;
 	private final int INIT_SIZE = 12;
+	private final int INIT_DECK_SIZE = 81; //mostly for debug
 	private int stateNum =0;
 	// Each card is a 4 digit String where each digit is from 0 - 2 
 	// and corresponds to a feature of the Set card
@@ -38,10 +39,10 @@ public class Game {
 		this.name = name;
 		stateNum = 0;
 		players = new HashMap<>();
-		deck = new HashMap<>(81);
+		deck = new HashMap<>(INIT_DECK_SIZE);
 		outCards = new ArrayList<String>();//new HashMap<>(21);
 
-		for (int i = 0; i < 81; i++) {
+		for (int i = 0; i < INIT_DECK_SIZE; i++) {
 			String res = getCardString(i);
 			deck.put(i, res);
 		}
@@ -83,6 +84,7 @@ public class Game {
 			}catch(Exception e){System.err.println("delete failed");}
 			System.out.println("more then 12 cards last time");
 		}else{
+			System.out.println("HERE----------------------------");
 			add3Cards(c1, c2, c3);//replace the cards (or delete if non left in deck)			
 		}
 		while(!outContainsSet() && deck.size()>0){
@@ -149,11 +151,11 @@ public class Game {
 			ownedcards.add(card3s);
 			players.put(playerID, ownedcards);
 
-			System.out.println(outCards.toString());
+			System.out.println("before fillOutCards " + outCards.toString());
 
 			fillOutCards(card1s,card2s,card3s);
 			
-			System.out.println(outCards.toString());
+			System.out.println("after fillOutCards " + outCards.toString());
 
 			return true;
 		}
@@ -183,10 +185,10 @@ public class Game {
 
 
 	private void add3Cards(int c1,int c2,int c3){
-		System.out.println("DESK SIZE: " + deck.size());
+		System.out.println("DECK SIZE: " + deck.size());
 		incrementStateNum();
-		Integer [] c = new Integer []{ c1, c2, c3}; 
-		if(deck.size() <3){
+		int [] c = new int []{ c1, c2, c3}; 
+		if(deck.size() <3){ //end state
 			for(int i=0;i<3;i++){
 				if(c[i] != -1) outCards.remove(c[i]);
 			}
@@ -194,10 +196,10 @@ public class Game {
 		}
 		Random rnd = new Random();
 		for (int i = 0; i < 3; i++) {
-			int index = rnd.nextInt(81);
+			int index = rnd.nextInt(INIT_DECK_SIZE);
 			while (!deck.containsKey(index)) {
-				index = (index + 1) % 81;
-				System.out.println("index: " + index);
+				index = (index + 1) % INIT_DECK_SIZE;
+				//System.out.println("index: " + index);
 			}
 			String card = deck.remove(index);
 			System.out.println(c[i] + " __ " + card);
