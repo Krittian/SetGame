@@ -55,7 +55,7 @@ function init() {
         console.log('code: ' + cardCode);
 	cardIndex = currSelectedList.indexOf(cardCode);
 	if (cardIndex == -1) {
-		cell.css('background','yellow');
+		cell.css('background','#ffcc00');
 		currSelectedList.push(cardCode);
 		currSelectedCells.push(cell);
 
@@ -111,6 +111,9 @@ function init() {
 
 	//
 function leaveGame(){
+	
+	clearInterval(requestTimer);
+	setTimeout(function(){
 	//TODO tell server you want to leave the game.
 	requestObj = {uid:uid,gameId:gid,leaveGame:true};
 	$.ajax({
@@ -123,13 +126,14 @@ function leaveGame(){
 			window.location.href = "/lobby";
 	     }
         });
-	
+	},requestDelay*2);
 }
 
 /*
 window.onbeforeunload = function(){
 //alert("closing");
-return false;
+	leaveGame();
+return true;
 }
 */
 
@@ -181,14 +185,14 @@ function createGameBoard() {
 }
 
 function createUserBoard(players,scores) {
-    userTable = $("#userboard");
-	table = "<tr><th colspan='2'><b>" + gid.replace(/_/g," ") + "</b></th><tr><tr><th>Players</th><th>Scores</th></tr>";
+    userTable = $("#users");
+	table = "<table id='userTable'><tr><th colspan='2'><b>" + gid.replace(/_/g," ") + "</b></th><tr><tr><th>Players</th><th>Scores</th></tr>";
 	for (i=0;i<players.length; i++) {
-	    table = table + "<tr><td>" + players[i] + "</td><td>" + scores[i] + "</td></tr>";
+	    table = table + "<tr class='userData'><td style='padding:5px'>" + players[i] + "</td><td style='padding:5px'>" + scores[i] + "</td></tr>";
 	}
 	//table += "</table>"
-	console.log(table);
-	userTable.html (table);
+	//console.log(table);
+	userTable.html (table+"</table>");
 }
 
 
@@ -244,6 +248,20 @@ function deleteBoard() {
     }
 }
 
+function getWinners(players,playerScores){
+	winnerScore = -1;
+	for(i = 0; i<players.length;i++){
+		if(playerScores[i] > winnerScore)
+			winnerScore = playerScores[i];
+	}
+	winners = [];
+	for(i = 0; i<players.length;i++){
+		if(playerScores[i] == winnerScore)
+			winners.push(players[i]);
+	}	
+	return winners;
+}
+
 function handleUpdate(data) {
 	if (data["hasUpdate"]) {
 		deleteBoard();
@@ -253,14 +271,16 @@ function handleUpdate(data) {
 		cards = data["cards"];
 		players = data["players"];
 		playerScores= data["playerScores"];
-
 		console.log("players: " + players);
 		console.log("playerScores: " + playerScores);
-		createUserBoard(players,playerScores);
-		if (cards.length < 12) {
-			console.log("END GAME STATE");
-			//remove all cards before adding them
+		if(data["gameOver"]){
+			gameHolder = $('#gameOver');
+			gameHolder.text("GAME OVER!! The Winner is " + getWinners(players,playerScores));
+			$('#setboard').hide();
+			return;
 		}
+		createUserBoard(players,playerScores);
+		boardWidth = Math.ceil(cards.length/boardHeight);
 		for (i = 0; i < cards.length; i++) {
 			x = i%boardWidth;
 			y = Math.floor(i/boardWidth);			

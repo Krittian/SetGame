@@ -70,7 +70,7 @@ public class Game {
 	 * one set on the board
 	 */
 	private void fillOutCards(){
-		while((outCards.size() <12 || !outContainsSet())){
+		while(outCards.size() < 12 || !outContainsSet()){
 			add3Cards(-1,-1,-1);
 		}
 	}
@@ -81,7 +81,7 @@ public class Game {
 				outCards.remove(c1);
 				outCards.remove(c2);
 				outCards.remove(c3);
-			}catch(Exception e){System.err.println("delete failed");}
+			} catch(Exception e){System.err.println("delete failed");}
 			System.out.println("more then 12 cards last time");
 		}else{
 			System.out.println("HERE----------------------------");
@@ -160,6 +160,10 @@ public class Game {
 			return true;
 		}
 		return false;
+	}
+	
+	public boolean checkEndGame(){
+		return deck.size() <3 && !outContainsSet();
 	}
 
 	public String[] getOutCards(boolean shuffle) {
@@ -318,11 +322,16 @@ public class Game {
 	 * @return false if the player didn't exist, and true if it removed it
 	 */
 	public boolean removePlayer(String uid){
-		if(!players.containsKey(uid))
+		if(players.remove(uid) == null){ //!players.containsKey(uid)){
+			System.out.println("Didn't find player trying to leave: " + uid);
 			return false;
-		players.remove(uid);
+		}
 		incrementStateNum();
-		System.out.println(getPlayers().toString());
+		System.out.print(players.size());
+		System.out.println("Remaining players: ");
+		String [] p = getPlayerNames();
+		for(int i = 0; i<p.length;i++)
+			System.out.println(p[i]);			
 		return true;
 	}
 

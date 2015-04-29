@@ -125,10 +125,10 @@ function sendSignupData() {
         success: function (data, textStatus, jqXHR) {
             if (data["authentication"] === true) {
                 $("#signup").hide();
-                $("#signupSubmitted").text(userdata["name"] + ", you signed up successfully!");
+                $(".signupSubmitted").text(userdata["name"] + ", you signed up successfully!");
                 sendLoginData(userdata["name"], userdata["password"]);
             } else {
-                $("#signupSubmitted").text("There was a problem... Try another username.");
+                $(".signupSubmitted").text("There was a problem... Try another username.");
             }
         }
     });
@@ -141,7 +141,7 @@ function goodCookieOrLogin(data) {
     $("#signup").hide();
     $("#games").show();
     name = getCookie("name");
-    $("#submitted").text("Welcome back " + name + "!");
+    $(".submitted").text("Welcome back " + name + "!");
     userinfo = data["userinfo"];
     uid = data["uid"];
     setCookie("uid", uid);
@@ -173,7 +173,7 @@ function sendLoginData(name, password) {
                 setCookie("name", userdata["name"]);
                 goodCookieOrLogin(data);
             } else {
-                $("#submitted").text("invalid username or password. try again.");
+                $(".submitted").text("invalid username or password. try again.");
             }
         }
     });
@@ -211,18 +211,20 @@ function getGameLink(id) {
 }
 
 function addToGameTable(id, name, count) {
-    $("#gamesTable").prepend("<tr data-id=" + id + "><td><a href=\'" + getGameLink(id) + "\'>" + name.replace(/_/g, " ") + "</a> Number of Players: " + count + "</td></tr>");
+    if (name == "BetaMidrash") $("#gamesTable").append("<tr><td><a href='https://play.google.com/store/apps/details?id=com.torahsummary.betamidrash'>BetaMidrash</a></td><td>613</td></tr>");
+    else $("#gamesTable").append("<tr data-id=" + id + "><td><a href=\'" + getGameLink(id) + "\'>" + name.replace(/_/g, " ") + "</a></td><td>" + count + "</td></tr>");
 }
 
 //idList - uuids of currently active games
 //nameList - names corresponding to uuids
 function refreshGameTable(idList, nameList, countList) {
     $("#gamesTable").empty();
+    $('#gamesTable').append("<tr><td>Game Name</td><td>Num Players</td></tr>");
     for (i = 0; i < idList.length; i++) {
         addToGameTable(idList[i], nameList[i], countList[i]);
     }
     if (idList.length == 0) { //there are no games right now..
-
+	$('#gamesTable').append("<tr><td colspan=2>(No games...Enter a name above and start the fun!)</td></tr>");
     }
 
 }

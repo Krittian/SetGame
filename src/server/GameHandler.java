@@ -49,6 +49,7 @@ public class GameHandler extends ResponseHandler {
         ret.put("stateNum", g.getStateNum());
         ret.put("players", g.getPlayerNames());
         ret.put("playerScores", g.getPlayerScores());
+        ret.put("gameOver", g.checkEndGame());
         return ret;
     }
 
@@ -66,6 +67,9 @@ public class GameHandler extends ResponseHandler {
             System.out.println( uid + " LEAVING "  + gID);
             Game g = gameList.get(gID);
             g.removePlayer(uid);
+            if(g.getPlayerNames().length == 0){
+            	gameList.remove(g.getID());//this game is done
+            }
         	
         }
     	else if (jsonMap.has("hasUpdate") && jsonMap.has("stateNum") && jsonMap.has("gameId")) {

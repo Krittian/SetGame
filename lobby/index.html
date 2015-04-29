@@ -9,39 +9,42 @@
 
     </head>
     <body>
-
-
-        <h1>Lobby</h1>
-		<button type="button" id="displaySignup" onclick="displaySignup()">Signup for new account</button>
-		<button type="button" id="displayLogin" onclick="displayLogin()">Login</button>
+	<div id="header">
+	The coooliest set game ever (4D++ style)
+	</div>
+	<div id="container">
+		<button style="position:absolute;right:0;top:78px;width:150px" type="button" id="displaySignup" onclick="displaySignup()">Sign Up</button>
+		<button style="position:absolute;right:0;top:78px;width:150px" type="button" id="displayLogin" onclick="displayLogin()">Login</button>
 		<form id="signup">
-            SIGN UP For a new account!!<br/>
-            Name: <input type="text" id="signupname"/>
-            Password: <input type="password" id="signuppassword" />
-            <input  type="submit" id="signupSubmit" value="Submit"  />
-        </form>
-        <form id="login">
-            Login: (Hint try username: "Eli", password: "b")<br/>
-            Name: <input type="text" id="name"/>
-            Password: <input type="password" id="password" />
-            <input  type="submit" id="loginSubmit" value="Submit"  />
-        </form>
-		<h2 id="signupSubmitted"></h2>
-        <div id="submitted"></div>
-        <div id="complete"></div>
-		<button type="button" id="logout" onclick="logout()">Log Out</button>
-	<div id="games">
-	    <input type="text" id="newgamename" value="" />
-	    <input type="button" type="submit" value="New Game" onclick="addGame()" />
-	    <span id="newgameerror"></span>
-	    <table id="gamesTable">
-		<tr>
-		    <td> row1 </td>
-		</tr>
-		<tr>
-		    <td> row2 </td>
-		</tr>
-	    </table>
+		    <h1>Sign Up</h1>
+		    <table>
+			    <tr><td colspan="2"><div class="signupSubmitted"></div></td></tr>
+			    <tr><td>Name: </td><td><input type="text" id="signupname"/></td></tr>
+			    <tr><td>Password: </td><td><input type="password" id="signuppassword" /></td></tr>
+			    <tr><td colspan="2"><input  type="submit" id="signupSubmit" value="Submit"  /></td></tr>
+		    </table>
+		</form>
+		<form id="login">
+		    <h1>Login</h1>
+		    <table >
+			    <tr><td colspan="2"><div class="submitted"></div></td></tr>
+			    <tr><td colspan="2"><div class="signupSubmitted"></div></td></tr>
+			    <tr><td>Name: </td><td><input type="text" id="name"/></td></tr>
+			    <tr><td>Password: </td><td><input type="password" id="password" /></td></tr>
+			    <tr><td colspan="2"><input  type="submit" id="loginSubmit" value="Submit"  /></td></tr>
+		    </table>
+		</form>
+		<div id="complete"></div>
+		<div id="games">
+			<table style="width:500px">
+			    <tr><td colspan="2"><div class="submitted"></div></td></tr>
+			    <tr><td colspan="2"><button type="button" id="logout" onclick="logout()">Log Out</button></td></tr>
+			    <tr><td ><input type="text" style="height:30px;width:350px" id="newgamename" maxlength=20 value="New Game Name Here" /></td><td><input type="button" type="submit" style="width:140px" value="Add Game" onclick="addGame()" /></td></tr>
+			    <tr><td colspan="2"><span id="newgameerror"></span></td></tr>
+			</table>
+			<table id="gamesTable">		   
+			</table>
+		</div>
 	</div>
 
     </body>

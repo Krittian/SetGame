@@ -118,7 +118,7 @@ public class LobbyHandler extends ResponseHandler {
 
     private JSONObject getGameData(JSONObject jsonMap) {
         JSONObject ret = new JSONObject();
-        System.out.println("lobbyHandler received In GAME_DATA: ");
+        //System.out.println("lobbyHandler received In GAME_DATA: ");
         JSONObject gameData = jsonMap.getJSONObject(GAME_DATA);
         
         String uid = "";
@@ -144,10 +144,9 @@ public class LobbyHandler extends ResponseHandler {
             System.out.println("lobbyHandler received In JOIN_GAME_STRING: ");
             ret.put("gameState", "you've joined a game!!");
         } else if (requestType.equals(REQ_GAMELIST_STRING)) {
-            System.out.println("lobbyHandler received In REQ_GAMELIST_STRING: ");
+           // System.out.println("lobbyHandler received In REQ_GAMELIST_STRING: ");
             ret = addGameInfo(ret);
         }
-        System.out.println("lobbyHandler received In GAME_DATA: " + uid + ", " + gameName + ", " + requestType);
         return ret;
     }
 
