@@ -24,7 +24,7 @@ hasUpdate = false; //this turns true when three cards are selected. At next requ
 
 //used to map trinary number to card picture file locations
 setCardMap = [["one","two","three"],["green","purple","red"],["diamond","oval","wavy"],["solid","clear","shaded"]];
-
+var cardImgs = [];
 $(function() {
     init();
 });
@@ -37,6 +37,20 @@ function init() {
 	name = getCookie("name");
     getUrlParams();
     cardConverterArray = createCardArray();
+    decCardCode = parseInt(trinCardCode,3); //trinary
+    for (var i=0; i<81; i++) {
+    	    var picPath = "http://ee.cooper.edu/~herzbe" + "/setCards";
+	    var trinCardCode = cardConverterArray[i];
+	    for (j = 0; j < 4; j++) {
+		paramChoices = setCardMap[j];
+		currTrigit = parseInt(trinCardCode.charAt(j));
+		picPath = picPath + "/" + paramChoices[currTrigit];   
+	    }
+	    picPath += "/card.PNG";
+	cardImgs[i] = document.createElement("img");
+	cardImgs[i].src = picPath;
+	cardImgs[i].setAttribute('data-cardcode',i);
+    }
     
     //initBoard
     deleteBoard();
@@ -217,17 +231,7 @@ function getUrlParam(sParam)
 
 function addCard(trinCardCode,x,y) {
     decCardCode = parseInt(trinCardCode,3); //trinary
-    removeCard(x,y);
-    //$("td[data-x=" + x + "][data-y=" + y + "]").append('<div class=setCard data-cardcode=' + cardCode + '>'+ cardCode + '</div>');
-    picPath = "http://ee.cooper.edu/~herzbe" + "/setCards";
-    for (j = 0; j < 4; j++) {
-        paramChoices = setCardMap[j];
-        currTrigit = parseInt(trinCardCode.charAt(j));
-        picPath = picPath + "/" + paramChoices[currTrigit];   
-    }
-    picPath += "/card.PNG";
-    //console.log(picPath);
-    $("td[data-x=" + x + "][data-y=" + y + "]").append('<img data-cardcode=' + decCardCode + ' src='+picPath+' ></img>');
+    $("td[data-x=" + x + "][data-y=" + y + "]").append(cardImgs[decCardCode]);
     boardGrid[x][y] = decCardCode;
 }
 
